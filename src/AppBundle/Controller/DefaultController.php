@@ -65,14 +65,14 @@ class DefaultController extends Controller
                 $em->persist($artist);
             }
             $artists[$recently_played_item["track"]["artists"][0]["id"]] = $artist;
-            $song = $songs[$recently_played_item["track"]["artists"][0]["id"]] ?? null;
+            $song = $songs[$recently_played_item["track"]["id"]] ?? null;
             if(!is_object($song))
                 $song = $em->getRepository("AppBundle:Song")->findOneBy(array("songId"=> $recently_played_item["track"]["id"]));
             if(!is_object($song)) {
                 $song = new Song($recently_played_item["track"]["id"], $recently_played_item["track"]["name"], $artist);
                 $em->persist($song);
             }
-            $songs[$recently_played_item["track"]["artists"][0]["id"]] = $song;
+            $songs[$recently_played_item["track"]["id"]] = $song;
             $songPlayed = $songsPlayed[$recently_played_item["track"]["id"]] ?? null;
             if(!is_object($songPlayed))
                 $songPlayed = $em->getRepository("AppBundle:PlayedSong")->findOneBy(array("song" => $song, "user"=> $user));
