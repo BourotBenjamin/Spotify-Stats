@@ -123,6 +123,7 @@ class DefaultController extends Controller
 
         return $this->render('AppBundle:Default:index.html.twig', array(
             "artist" => array_rand($artists2),
+            "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
         ));
     }
 

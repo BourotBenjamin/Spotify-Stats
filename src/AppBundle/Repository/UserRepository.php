@@ -3,6 +3,7 @@
 namespace AppBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * UserRepository
@@ -12,4 +13,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class UserRepository extends EntityRepository
 {
+
+    public function countPlayedSongs($userId) {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("count", "count");
+        return $this->getEntityManager()->createNativeQuery("SELECT COUNT(*) count FROM played__song WHERE user_id = ?", $rsm) ->setParameters(array($userId))->getSingleScalarResult();
+    }
 }
