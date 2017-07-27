@@ -42,7 +42,7 @@ class DefaultController extends Controller
         }
         $user->setToken($token->getAccessToken());
         $lastFetch = $user->getLastFetch();
-        $songs = $artists = $topArtists = $topSongs = $artists2 = array();
+        $topArtists = $topSongs = $artists2 = array();
         if($lastFetch)
             $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
         else
@@ -55,23 +55,33 @@ class DefaultController extends Controller
         curl_close($ch);
         $recently_played = json_decode($server_output, true);
         $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
+        $artists = $songs = $songsPlayed = [];
         foreach ($recently_played["items"] as $recently_played_item) {
-            $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("artistId"=> $recently_played_item["track"]["artists"][0]["id"]));
+            $artist = $artists[$recently_played_item["track"]["artists"][0]["id"]] ?? null;
+            if(!is_object($artist))
+                $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("artistId"=> $recently_played_item["track"]["artists"][0]["id"]));
             if(!is_object($artist)) {
                 $artist = new Artist($recently_played_item["track"]["artists"][0]["id"], $recently_played_item["track"]["artists"][0]["name"]);
                 $em->persist($artist);
             }
-            $song = $em->getRepository("AppBundle:Song")->findOneBy(array("songId"=> $recently_played_item["track"]["id"]));
+            $artists[$recently_played_item["track"]["artists"][0]["id"]] = $artist;
+            $song = $songs[$recently_played_item["track"]["artists"][0]["id"]] ?? null;
+            if(!is_object($song))
+                $song = $em->getRepository("AppBundle:Song")->findOneBy(array("songId"=> $recently_played_item["track"]["id"]));
             if(!is_object($song)) {
                 $song = new Song($recently_played_item["track"]["id"], $recently_played_item["track"]["name"], $artist);
                 $em->persist($song);
             }
-            $songPlayed = $em->getRepository("AppBundle:PlayedSong")->findOneBy(array("song" => $song, "user"=> $user));
+            $songs[$recently_played_item["track"]["artists"][0]["id"]] = $song;
+            $songPlayed = $songsPlayed[$recently_played_item["track"]["id"]] ?? null;
+            if(!is_object($songPlayed))
+                $songPlayed = $em->getRepository("AppBundle:PlayedSong")->findOneBy(array("song" => $song, "user"=> $user));
             if(!is_object($songPlayed)) {
                 $songPlayed = new PlayedSong($song, $user);
             } else {
                 $songPlayed->addCount();
             }
+            $songsPlayed[$recently_played_item["track"]["id"]] = $songPlayed;
             $em->persist($songPlayed);
         }
         $user->setLastFetch($newlastFetch ?? $lastFetch);
