@@ -46,7 +46,7 @@ class DefaultController extends Controller
         if($lastFetch)
             $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
         else
-            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
+            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50");
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer ' . $token->getAccessToken()
         ));
