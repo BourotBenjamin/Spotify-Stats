@@ -62,7 +62,7 @@ class PlayedSong
     /**
      * @return int
      */
-    public function getCount(): int
+    public function getCount()
     {
         return $this->count;
     }
@@ -79,7 +79,7 @@ class PlayedSong
     /**
      * @return Song
      */
-    public function getSong(): Song
+    public function getSong()
     {
         return $this->song;
     }
@@ -97,7 +97,7 @@ class PlayedSong
     /**
      * @return User
      */
-    public function getUser(): User
+    public function getUser()
     {
         return $this->user;
     }
