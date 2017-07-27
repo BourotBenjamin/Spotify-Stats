@@ -119,6 +119,7 @@ class DefaultController extends Controller
                     $artists2[$song["artists"][0]["name"]] = 1;
             }
         }
+        $em->flush();
 
         return $this->render('AppBundle:Default:index.html.twig', array(
             "artist" => array_rand($artists2),
