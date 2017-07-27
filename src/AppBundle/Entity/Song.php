@@ -22,6 +22,11 @@ class Song
     private $id;
 
     /**
+     * @ORM\Column(name="song_id", type="string")
+     */
+    private $songId;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
@@ -36,8 +41,9 @@ class Song
     private $artist;
 
 
-    public function __construct($name, Artist $artist)
+    public function __construct($id, $name, Artist $artist)
     {
+        $this->songId = $id;
         $this->name = $name;
         $this->artist = $artist;
     }
@@ -95,4 +101,21 @@ class Song
     {
         return $this->artist;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getSongId()
+    {
+        return $this->songId;
+    }
+
+    /**
+     * @param mixed $songId
+     */
+    public function setSongId($songId)
+    {
+        $this->songId = $songId;
+    }
+
 }

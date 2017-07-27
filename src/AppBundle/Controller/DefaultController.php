@@ -56,14 +56,14 @@ class DefaultController extends Controller
         $recently_played = json_decode($server_output, true);
         $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
         foreach ($recently_played["items"] as $recently_played_item) {
-            $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("name"=> $recently_played_item["track"]["artists"][0]["name"]));
+            $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("id"=> $recently_played_item["track"]["artists"][0]["id"]));
             if(!is_object($artist)) {
-                $artist = new Artist($recently_played_item["track"]["artists"][0]["name"]);
+                $artist = new Artist($recently_played_item["track"]["artists"][0]["id"], $recently_played_item["track"]["artists"][0]["name"]);
                 $em->persist($artist);
             }
-            $song = $em->getRepository("AppBundle:Song")->findOneBy(array("artist" => $artist, "name"=> $recently_played_item["track"]["name"]));
+            $song = $em->getRepository("AppBundle:Song")->findOneBy(array("songId"=> $recently_played_item["track"]["id"]));
             if(!is_object($song)) {
-                $song = new Song($recently_played_item["track"]["name"], $artist);
+                $song = new Song($recently_played_item["track"]["id"], $recently_played_item["track"]["name"], $artist);
                 $em->persist($song);
             }
             $songPlayed = $em->getRepository("AppBundle:PlayedSong")->findOneBy(array("song" => $song, "user"=> $user));

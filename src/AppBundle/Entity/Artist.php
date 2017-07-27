@@ -24,13 +24,21 @@ class Artist
     /**
      * @var string
      *
+     * @ORM\Column(name="artist_id", type="string", length=255)
+     */
+    private $artistId;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
 
-    public function __construct($name)
+    public function __construct($artistId, $name)
     {
+        $this->artistId = $artistId;
         $this->name = $name;
     }
 
