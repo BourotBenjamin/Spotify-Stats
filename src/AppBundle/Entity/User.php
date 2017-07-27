@@ -37,7 +37,7 @@ class User
 
 
     /**
-     * @ORM\Column(name="last_fetch", type="bigint", nullable=ture)
+     * @ORM\Column(name="last_fetch", type="bigint", nullable=true)
      */
     private $last_fetch;
 
