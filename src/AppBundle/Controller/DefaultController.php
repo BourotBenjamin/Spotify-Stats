@@ -56,7 +56,7 @@ class DefaultController extends Controller
         $recently_played = json_decode($server_output, true);
         $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
         foreach ($recently_played["items"] as $recently_played_item) {
-            $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("id"=> $recently_played_item["track"]["artists"][0]["id"]));
+            $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("artistId"=> $recently_played_item["track"]["artists"][0]["id"]));
             if(!is_object($artist)) {
                 $artist = new Artist($recently_played_item["track"]["artists"][0]["id"], $recently_played_item["track"]["artists"][0]["name"]);
                 $em->persist($artist);
