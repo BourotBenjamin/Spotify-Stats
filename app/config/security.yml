@@ -29,3 +29,4 @@ security:
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login/check-spotify, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/stats, roles: IS_AUTHENTICATED_FULLY }

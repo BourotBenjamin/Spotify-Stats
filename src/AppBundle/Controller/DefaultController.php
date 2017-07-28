@@ -15,9 +15,14 @@ use Symfony\Component\HttpFoundation\Request;
 class DefaultController extends Controller
 {
 
-    /*curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS,
-        "postvar1=value1&postvar2=value2&postvar3=value3");*/
+    private function refreshToken(OAuthToken $token) {
+        $owner = $this->get("hwi_oauth.resource_owner.spotify");
+        $result = $owner->refreshAccessToken($token->getRefreshToken());
+        if(isset($result["access_token"]))
+            $token->setAccessToken($result["access_token"]);
+        return $token;
+    }
+
     /**
      * @Route("/", name="homepage")
      */
@@ -26,8 +31,7 @@ class DefaultController extends Controller
         if(!$this->isGranted("IS_AUTHENTICATED_FULLY"))
             return $this->redirectToRoute('hwi_oauth_connect');
         $em = $this->getDoctrine()->getManager();
-        /** @var OAuthToken $token */
-        $token = $this->get('security.context')->getToken();
+        $token = $this->refreshToken($this->get('security.token_storage')->getToken());
         $user = $em->getRepository("AppBundle:User")->findOneBy(array("spotifyId"=> $token->getUser()->getUsername()));
         if(!is_object($user))
         {
@@ -35,14 +39,9 @@ class DefaultController extends Controller
             $user->setSpotifyId($token->getUser()->getUsername());
             $em->persist($user);
         } else {
-            $owner = $this->get("hwi_oauth.resource_owner.spotify");
-            $result = $owner->refreshAccessToken($token->getRefreshToken());
-            if(isset($result["access_token"]))
-                $token->setAccessToken($result["access_token"]);
         }
         $user->setToken($token->getAccessToken());
         $lastFetch = $user->getLastFetch();
-        $topArtists = $topSongs = $artists2 = array();
         if($lastFetch)
             $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
         else
@@ -53,10 +52,10 @@ class DefaultController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $server_output = curl_exec($ch);
         curl_close($ch);
-        $recently_played = json_decode($server_output, true);
-        $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
+        $api_response = json_decode($server_output, true);
+        $newlastFetch = $newlastFetch ?? $api_response["cursors"]["after"] ?? $lastFetch;
         $artists = $songs = $songsPlayed = [];
-        foreach ($recently_played["items"] as $recently_played_item) {
+        foreach ($api_response["items"] as $recently_played_item) {
             $artist = $artists[$recently_played_item["track"]["artists"][0]["id"]] ?? null;
             if(!is_object($artist))
                 $artist = $em->getRepository("AppBundle:Artist")->findOneBy(array("artistId"=> $recently_played_item["track"]["artists"][0]["id"]));
@@ -86,54 +85,41 @@ class DefaultController extends Controller
         }
         $user->setLastFetch($newlastFetch ?? $lastFetch);
         $em->persist($user);
-
-        $next = "https://api.spotify.com/v1/me/top/artists";
-        $i = 0;
-        while ($next !== false && $i < 100) {
-            ++$i;
-            /** @var OAuthToken $token */
-            $ch = curl_init($next);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Authorization: Bearer ' . $token->getAccessToken()
-            ));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $server_output = curl_exec($ch);
-            curl_close($ch);
-
-            $recently_played = json_decode($server_output, true);
-            $next = $recently_played["next"] ?? false;
-            foreach ($recently_played["items"] as $artist) {
-                $topArtists[] = $artist["name"];
-            }
-        }
-        $next = "https://api.spotify.com/v1/me/top/tracks";
-        $i = 0;
-        while ($next !== false && $i < 100) {
-            ++$i;
-            /** @var OAuthToken $token */
-            $ch = curl_init($next);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Authorization: Bearer ' . $token->getAccessToken()
-            ));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $server_output = curl_exec($ch);
-            curl_close($ch);
-
-            $recently_played = json_decode($server_output, true);
-            $next = $recently_played["next"] ?? false;
-            foreach ($recently_played["items"] as $song) {
-                $topSongs[] = $song["name"];
-                if (isset($artists2[$song["artists"][0]["name"]]))
-                    $artists2[$song["artists"][0]["name"]] += 1;
-                else
-                    $artists2[$song["artists"][0]["name"]] = 1;
-            }
-        }
         $em->flush();
 
         return $this->render('AppBundle:Default:index.html.twig', array(
-            "artist" => array_rand($artists2),
             "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
+        ));
+    }
+
+    /**
+     * @Route("/stats", name="stats")
+     */
+    public function statsAction() {
+        $token = $this->refreshToken($this->get('security.token_storage')->getToken());
+        $topArtists = $topSongs = $topSongsArtists = array();
+
+        $ch = curl_init("https://api.spotify.com/v1/me/top/artists?limit=50");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . $token->getAccessToken()
+        ));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $server_output = curl_exec($ch);
+        curl_close($ch);
+        $topArtists = json_decode($server_output, true)["items"];
+
+        $ch = curl_init("https://api.spotify.com/v1/me/top/tracks?limit=50");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . $token->getAccessToken()
+        ));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $server_output = curl_exec($ch);
+        curl_close($ch);
+        $topSongs = json_decode($server_output, true)["items"];
+
+        return $this->render('AppBundle:Default:stats.html.twig', array(
+            "topArtists" => $topArtists,
+            "topSongs" => $topSongs,
         ));
     }
 
