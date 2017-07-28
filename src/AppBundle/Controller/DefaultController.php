@@ -43,7 +43,6 @@ class DefaultController extends Controller
         $user->setToken($token->getAccessToken());
         $lastFetch = $user->getLastFetch();
         $topArtists = $topSongs = $artists2 = array();
-        $lastFetch = null;
         if($lastFetch)
             $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
         else
