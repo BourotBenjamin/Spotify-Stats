@@ -43,10 +43,11 @@ class DefaultController extends Controller
         $user->setToken($token->getAccessToken());
         $lastFetch = $user->getLastFetch();
         $topArtists = $topSongs = $artists2 = array();
+        $lastFetch = null;
         if($lastFetch)
             $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
         else
-            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50");
+            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=49");
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer ' . $token->getAccessToken()
         ));
@@ -54,6 +55,7 @@ class DefaultController extends Controller
         $server_output = curl_exec($ch);
         curl_close($ch);
         $recently_played = json_decode($server_output, true);
+        var_dump(array_keys($recently_played));
         $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
         $artists = $songs = $songsPlayed = [];
         foreach ($recently_played["items"] as $recently_played_item) {
