@@ -55,7 +55,6 @@ class DefaultController extends Controller
         $server_output = curl_exec($ch);
         curl_close($ch);
         $recently_played = json_decode($server_output, true);
-        var_dump(array_keys($recently_played));
         $newlastFetch = $newlastFetch ?? $recently_played["cursors"]["after"] ?? $lastFetch;
         $artists = $songs = $songsPlayed = [];
         foreach ($recently_played["items"] as $recently_played_item) {
