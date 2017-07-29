@@ -63,11 +63,12 @@ class UpdateUserHistoryService
             $server_output = curl_exec($ch);
             curl_close($ch);
             $api_response = json_decode($server_output, true);
-            $newlastFetch = $newlastFetch ?? $api_response["cursors"]["after"] ?? $lastFetch;
             $artists = $songs = $songsPlayed = [];
             if(isset($api_response["items"])) {
                 foreach ($api_response["items"] as $recently_played_item) {
-                    $artist = $artists[$recently_played_item["track"]["artists"][0]["id"]] ?? null;
+                    $artist = null;
+                    if(isset($artists[$recently_played_item["track"]["artists"][0]["id"]]))
+                        $artist = $artists[$recently_played_item["track"]["artists"][0]["id"]];
                     if (!is_object($artist))
                         $artist = $this->em->getRepository("AppBundle:Artist")->findOneBy(array("artistId" => $recently_played_item["track"]["artists"][0]["id"]));
                     if (!is_object($artist)) {
@@ -75,7 +76,9 @@ class UpdateUserHistoryService
                         $this->em->persist($artist);
                     }
                     $artists[$recently_played_item["track"]["artists"][0]["id"]] = $artist;
-                    $song = $songs[$recently_played_item["track"]["id"]] ?? null;
+                    $song = null;
+                    if(isset($songs[$recently_played_item["track"]["id"]]))
+                        $song = $songs[$recently_played_item["track"]["id"]];
                     if (!is_object($song))
                         $song = $this->em->getRepository("AppBundle:Song")->findOneBy(array("songId" => $recently_played_item["track"]["id"]));
                     if (!is_object($song)) {
@@ -83,7 +86,9 @@ class UpdateUserHistoryService
                         $this->em->persist($song);
                     }
                     $songs[$recently_played_item["track"]["id"]] = $song;
-                    $songPlayed = $songsPlayed[$recently_played_item["track"]["id"]] ?? null;
+                    $songPlayed = null;
+                    if(isset($songsPlayed[$recently_played_item["track"]["id"]]))
+                        $songPlayed = $songsPlayed[$recently_played_item["track"]["id"]];
                     if (!is_object($songPlayed))
                         $songPlayed = $this->em->getRepository("AppBundle:PlayedSong")->findOneBy(array("song" => $song, "user" => $user));
                     if (!is_object($songPlayed)) {
@@ -94,7 +99,8 @@ class UpdateUserHistoryService
                     $songsPlayed[$recently_played_item["track"]["id"]] = $songPlayed;
                     $this->em->persist($songPlayed);
                 }
-                $user->setLastFetch($newlastFetch ?? $lastFetch);
+                if(isset($api_response["cursors"]["after"]))
+                    $user->setLastFetch($api_response["cursors"]["after"]);
                 $this->em->persist($user);
                 if ($flush)
                     $this->em->flush();
