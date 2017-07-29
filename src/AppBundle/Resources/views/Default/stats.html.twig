@@ -2,8 +2,17 @@
 <html>
 <body>
 <style>
+        .pop {
+                height: 10px;
+                width: 10px;
+                padding: 0px;
+                border-radius: 50%;
+                display: inline-block;
+        }
+        .artist {
+                display: inline-flex;
+        }
         a {
-                display: inline-grid;
                 text-decoration: none;
         }
         .images {
@@ -12,24 +21,21 @@
                 width: 150px;
                 background-size: cover;
         }
-        .images div {
+        .title {
                 color: white;
                 background: rgba(0,0,0,0.5);
                 padding: 5px;
+                line-height:initial;
         }
-        .pop {
-                height: 5px;
-                width: 5px;
-                padding: 0px;
-                border-radius: 50%;
-                display: inline-block;
+        div {
+                line-height:0;
         }
 </style>
 <h1> Favorite Artists </h1>
 {% for artist in topArtists %}
-        <a title="{{ artist.name }}" target="_blank" href="{{ artist.external_urls.spotify }}">
+        <a class="artist" title="{{ artist.name }}" target="_blank" href="{{ artist.external_urls.spotify }}">
                 <div class="images" style="background-image: url('{{ artist.images.0.url }}');">
-                        <div>
+                        <div class="title">
                                 <div title="{{ artist.popularity }}"  class="pop" style="background-color: rgb({{ ((100.0 - artist.popularity) * 2.55)|round }}, {{ (artist.popularity * 2.55)|round }}, 0)"></div>
                                 {{ artist.name }}
                         </div>
@@ -38,16 +44,7 @@
 {% endfor %}
 <br>
 <h1> Favorite Songs </h1>
-{% for song in topSongs %}
-        <a title="{{ song.name }}" target="_blank" href="{{ song.external_urls.spotify }}">
-                <div class="images" style="background-image: url('{{ song.album.images.0.url }}');">
-                        <div>
-                                <div title="{{ song.popularity }}"  class="pop" style="background-color: rgb({{ ((100.0 - song.popularity) * 2.55)|round }}, {{ (song.popularity * 2.55)|round }}, 0)"></div>
-                                {{ song.name }}
-                        </div>
-                </div>
-        </a>
-{% endfor %}
+{{ include('AppBundle:Default:stats_songs.html.twig') }}
 <br>
 <a href="{{ path('homepage') }}">Return to index</a>
 </body>

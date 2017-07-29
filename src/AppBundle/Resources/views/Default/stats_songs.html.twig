@@ -1,0 +1,88 @@
+<style>
+    .bar {
+        position: absolute;
+        top: 15px;
+        left: 55px;
+        height: 20px;
+        width: 200px;
+        background-color: darkred;
+        color: white;
+        line-height:initial;
+    }
+    .song {
+        display: block;
+        height: 50px;
+        position: relative;
+    }
+    .song-picture {
+        height: 50px;
+        width: 50px;
+        background-size: cover;
+    }
+</style>
+<h3>
+    Sort : <select title="sort-options" name="song-sort" class="song-sort">
+        <option value="popularity" selected="selected">popularity</option>
+        <option value="danceability">danceability</option>
+        <option value="energy">energy</option>
+        <option value="valence">valence</option>
+        <option value="speechiness">speechiness</option>
+        <option value="acousticness">acousticness</option>
+        <option value="liveness">liveness</option>
+        <option value="instrumentalness">instrumentalness</option>
+        <option value="loudness">loudness</option>
+        <option value="key">key</option>
+        <option value="tempo">tempo</option>
+    </select>
+</h3>
+<div class="top_songs">
+    {% for song in songs %}
+        <a class="song" title="{{ song.name }}" target="_blank" href="{{ song.external_urls.spotify }}"
+           data-danceability="{{ attribute(songsStats, loop.index0).danceability }}"
+           data-energy="{{ attribute(songsStats, loop.index0).energy }}"
+           data-valence="{{ attribute(songsStats, loop.index0).valence }}"
+           data-speechiness="{{ attribute(songsStats, loop.index0).speechiness }}"
+           data-acousticness="{{ attribute(songsStats, loop.index0).acousticness }}"
+           data-liveness="{{ attribute(songsStats, loop.index0).liveness }}"
+           data-instrumentalness="{{ attribute(songsStats, loop.index0).instrumentalness }}"
+           data-loudness="{{ (attribute(songsStats, loop.index0).loudness + 60.0) / 30.0 }}"
+           data-key="{{ attribute(songsStats, loop.index0).key / 10.0 }}"
+           data-tempo="{{ attribute(songsStats, loop.index0).tempo / 200.0 }}"
+           data-popularity="{{ song.popularity / 100.0 }}"
+        >
+            <div class="song-picture" style="background-image: url('{{ song.album.images.0.url }}');"></div>
+            <div class="bar">{{ song.name }}</div>
+        </a>
+    {% endfor %}
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+
+    function updateStats() {
+        var dataname = $(".song-sort").val();
+        $songs =  $(".top_songs");
+        $songs.appendTo($songs);
+        $('.top_songs').html($songs.html());
+        var min = Math.min.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
+        var max = Math.max.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
+        $('.song').sort(function(a, b) {
+            return parseFloat($(b).data(dataname)) - parseFloat($(a).data(dataname));
+        }).appendTo($('.top_songs')).each( function ()  {
+            var pcent = ( parseFloat($(this).data(dataname)) - min ) / (max - min);
+            $(this).find(".bar").css('width', ( pcent * 600 + 200 )+"px")
+                .css("background-color", 'rgb('+
+                    parseInt( 255 - (pcent * 255) )+','+
+                    parseInt( pcent * 255 )+','+
+                    '0)'
+                );
+        });
+        console.log($('.top_songs'));
+    }
+    $(".song-sort").on("change", function() {
+        updateStats();
+    });
+    updateStats();
+
+</script>

@@ -117,9 +117,58 @@ class DefaultController extends Controller
         curl_close($ch);
         $topSongs = json_decode($server_output, true)["items"];
 
+        $ch = curl_init("https://api.spotify.com/v1/audio-features?ids=".implode(",", array_column($topSongs, "id")));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . $token->getAccessToken()
+        ));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $server_output = curl_exec($ch);
+        curl_close($ch);
+        $topSongsStats = json_decode($server_output, true)["audio_features"];
         return $this->render('AppBundle:Default:stats.html.twig', array(
             "topArtists" => $topArtists,
-            "topSongs" => $topSongs,
+            "songs" => $topSongs,
+            "songsStats" => $topSongsStats,
+        ));
+    }
+
+    /**
+     * @Route("/listened", name="listened")
+     */
+    public function listenedAction() {
+        $em = $this->getDoctrine()->getManager();
+        $token = $this->refreshToken($this->get('security.token_storage')->getToken());
+        $user = $em->getRepository("AppBundle:User")->findOneBy(array("spotifyId"=> $token->getUser()->getUsername()));
+        $songsPlayed = $em->getRepository("AppBundle:PlayedSong")->findBy(array("user"=> $user));
+        $songsPlayedIds = [];
+        foreach ($songsPlayed as $songPlayed) {
+            if(!empty($songPlayed->getSong()->getSongId()))
+                $songsPlayedIds[] = $songPlayed->getSong()->getSongId();
+        }
+
+        $songsStats = $songs = [];
+        $songsPlayedIds = array_chunk($songsPlayedIds, 50);
+        foreach ($songsPlayedIds as $songsPlayedIdsSubArray) {
+            $ch = curl_init("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsPlayedIdsSubArray));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer ' . $token->getAccessToken()
+            ));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec($ch);
+            curl_close($ch);
+            $songs = array_merge($songs, json_decode($server_output, true)["tracks"]);
+            $ch = curl_init("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsPlayedIdsSubArray));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer ' . $token->getAccessToken()
+            ));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec($ch);
+            curl_close($ch);
+            $songsStats = array_merge($songsStats, json_decode($server_output, true)["audio_features"]);
+        }
+        return $this->render('AppBundle:Default:stats_songs.html.twig', array(
+            "songs" => $songs,
+            "songsStats" => $songsStats,
         ));
     }
 
