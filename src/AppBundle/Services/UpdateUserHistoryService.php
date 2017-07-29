@@ -32,7 +32,7 @@ class UpdateUserHistoryService
         $this->spotify = $spotify;
     }
 
-    function refreshToken(User $user, bool $flush = false) {
+    function refreshToken(User $user, $flush = false) {
         $result = $this->spotify->refreshAccessToken($user->getRefreshToken());
         if(isset($result["access_token"]))
             $user->setToken($result["access_token"]);
@@ -50,7 +50,7 @@ class UpdateUserHistoryService
         $this->em->flush();
     }
 
-    function updateUserHistory(User $user, bool $flush = false) {
+    function updateUserHistory(User $user, $flush = false) {
             $lastFetch = $user->getLastFetch();
             if($lastFetch)
                 $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
