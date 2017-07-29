@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use FOS\UserBundle\Entity\User as BaseUser;
 
 /**
  * User
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  */
-class User
+class User extends BaseUser
 {
     /**
      * @var int
@@ -19,28 +20,44 @@ class User
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="spotify_id", type="integer", unique=true)
      */
     private $spotifyId;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="token", type="string", length=255, unique=true)
      */
     private $token;
 
+    /**
+     * @ORM\Column(name="refresh_token", type="string")
+     */
+    private $refreshToken;
 
     /**
      * @ORM\Column(name="last_fetch", type="bigint", nullable=true)
      */
     private $last_fetch;
 
+    /**
+     * @return mixed
+     */
+    public function getRefreshToken()
+    {
+        return $this->refreshToken;
+    }
+
+    /**
+     * @param mixed $refreshToken
+     */
+    public function setRefreshToken($refreshToken)
+    {
+        $this->refreshToken = $refreshToken;
+        return $this;
+    }
 
     /**
      * Get id
@@ -61,7 +78,6 @@ class User
     public function setSpotifyId($spotifyId)
     {
         $this->spotifyId = $spotifyId;
-
         return $this;
     }
 

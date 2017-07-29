@@ -4,6 +4,11 @@ parameters:
     #parameter_name: value
 
 services:
-    #service_name:
-    #    class: AppBundle\Directory\ClassName
-    #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
+    my.oauth_aware.user_provider.service:
+        class: AppBundle\Security\FOSUBUserProvider
+        arguments:
+            - '@fos_user.user_manager'
+            - { spotify: 'spotifyId' }
+    app.services.update_user_history_service:
+        class: AppBundle\Services\UpdateUserHistoryService
+        arguments: ['@doctrine.orm.default_entity_manager', '@hwi_oauth.resource_owner.spotify']

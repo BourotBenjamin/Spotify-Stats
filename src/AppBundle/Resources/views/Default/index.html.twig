@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <body>
-Hi !<br>
+Hi {{ app.user.username }} !<br>
 You have listen to <a href="{{ path('listened') }}">{{ count }} songs</a> since we know each others.<br>
 <a href="{{ path('stats') }}"> Want more stats ? :)</a>
 </body>
