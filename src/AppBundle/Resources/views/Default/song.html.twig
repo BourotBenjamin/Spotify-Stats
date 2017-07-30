@@ -1,0 +1,23 @@
+<style>
+        div {
+                line-height:0;
+                display: inline-flex;
+        }
+        .segment {
+                margin-left: 1px;
+                background-color: lightskyblue;
+                position: relative;
+        }
+</style>
+
+<h1>{{ song.name }} - {{  song.artist.name }}</h1>
+<div style="height: 400px;">
+    {% for segment in stats.segments %}
+        <div class="segment" style="
+                width: {{ segment.duration * 10 }}px;
+                height: {{ (segment.loudness_start + 60) * (segment.loudness_start + 60) / 20 }}px;
+                top: {{ 90 - ((segment.loudness_start + 60) * (segment.loudness_start + 60) / 40) }}px;
+                " ></div>
+    {% endfor %}
+</div>
+<a href="{{ path('homepage') }}">Return to index</a>

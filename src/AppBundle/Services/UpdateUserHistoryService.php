@@ -9,9 +9,12 @@
 namespace AppBundle\Services;
 
 
+use AppBundle\Entity\Album;
 use AppBundle\Entity\Artist;
+use AppBundle\Entity\Genre;
 use AppBundle\Entity\PlayedSong;
 use AppBundle\Entity\Song;
+use AppBundle\Entity\SongStats;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
 use HWI\Bundle\OAuthBundle\OAuth\ResourceOwner\SpotifyResourceOwner;
@@ -37,7 +40,11 @@ class UpdateUserHistoryService
         if(isset($result["access_token"]))
             $user->setToken($result["access_token"]);
         $this->em->persist($user);
-        $this->em->flush();
+        if($flush) {
+            $this->updateAlbumsGenres($user);
+            $this->updateSongAlbumAndStats($user);
+            $this->em->flush();
+        }
     }
 
     function updateUsersHistory()
@@ -47,6 +54,8 @@ class UpdateUserHistoryService
             $this->refreshToken($user);
             $this->updateUserHistory($user);
         }
+        $this->updateAlbumsGenres($users[0]);
+        $this->updateSongAlbumAndStats($users[0]);
         $this->em->flush();
     }
 
@@ -106,5 +115,113 @@ class UpdateUserHistoryService
                     $this->em->flush();
             }
     }
+
+    private function updateAlbumsGenres(User &$user)
+    {
+        $albums = $this->em->getRepository('AppBundle:Album')->findAll();
+        $albumsByIds = [];
+        foreach ($albums as &$album) {
+            $albumsByIds[$album->getAlbumId()] = &$album;
+        }
+        $genres = $this->em->getRepository('AppBundle:Genre')->findAll();
+        $genresByNames = [];
+        foreach ($genres as &$genre) {
+            $genresByNames[$genre->getName()] = &$genre;
+        }
+
+        $albumsIds = array_chunk(array_keys($albumsByIds), 20);
+        foreach ($albumsIds as $albumsIdsSubArray) {
+            $ch = curl_init("https://api.spotify.com/v1/albums?ids=" . implode(",", $albumsIdsSubArray));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer ' . $user->getToken()
+            ));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec($ch);
+            curl_close($ch);
+            $albumsInfos = json_decode($server_output, true)["albums"];
+            foreach ($albumsInfos as $albumInfos) {
+                $album = $albumsByIds[$albumInfos['id']];
+                foreach ($albumInfos['genres'] as $genreName) {
+                    if (isset($genres[$genreName]))
+                        $genre = $genres[$genreName];
+                    else {
+                        $genre = new Genre();
+                        $genre->setName($genreName);
+                        $this->em->persist($genre);
+                        $genres[$genreName] = $genre;
+                    }
+                    $album->addGenre($genre);
+                }
+                $this->em->persist($album);
+            }
+        }
+    }
+
+    private function updateSongAlbumAndStats(User &$user)
+    {
+        $songs = $this->em->getRepository('AppBundle:Song')->findAll();
+        $songsByIds = [];
+        foreach ($songs as $songEntity) {
+            $songsByIds[$songEntity->getSongId()] = $songEntity;
+        }
+        $albums = $this->em->getRepository('AppBundle:Album')->findAll();
+        $albumsByIds = [];
+        foreach ($albums as &$album) {
+            $albumsByIds[$album->getAlbumId()] = &$album;
+        }
+        $songsIds = array_chunk(array_keys($songsByIds), 50);
+        foreach ($songsIds as $songsIdsSubArray) {
+            $ch = curl_init("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsIdsSubArray));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer ' . $user->getToken()
+            ));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec($ch);
+            curl_close($ch);
+            $songInfos = json_decode($server_output, true)["tracks"];
+            $ch = curl_init("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer ' . $user->getToken()
+            ));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec($ch);
+            curl_close($ch);
+            $songFeatures = json_decode($server_output, true)["audio_features"];
+            foreach ($songInfos as $key => $song)
+                if(!empty($song))
+                {
+                    $songEntity = $songsByIds[$song["id"]];
+                    if(!isset($albumsByIds[$song["album"]['id']])) {
+                        $albumsByIds[$song["album"]['id']] = new Album(
+                            $song["album"]['id'],
+                            $song["album"]['name'],
+                            $song["album"]['images'][0]['url']);
+                        $this->em->persist($albumsByIds[$song["album"]['id']]);
+                    }
+                    $songEntity->setAlbum($albumsByIds[$song["album"]['id']]);
+                    if(!is_object($songStats = $songEntity->getStats())) {
+                        $songStats = new SongStats();
+                        $this->em->persist($songStats);
+                        $songEntity->setStats($songStats);
+                    }
+                    $songStats->setPopularity($song['popularity'])
+                        ->setAcousticness($songFeatures[$key]['acousticness'])
+                        ->setDanceability($songFeatures[$key]['danceability'])
+                        ->setEnergy($songFeatures[$key]['energy'])
+                        ->setInstrumentalness($songFeatures[$key]['instrumentalness'])
+                        ->setSongKey($songFeatures[$key]['key'])
+                        ->setLiveness($songFeatures[$key]['liveness'])
+                        ->setLoudness($songFeatures[$key]['loudness'])
+                        ->setSpeechiness($songFeatures[$key]['speechiness'])
+                        ->setTempo($songFeatures[$key]['tempo'])
+                        ->setValence($songFeatures[$key]['valence'])
+                    ;
+                    $this->em->persist($songStats);
+                    $this->em->persist($songEntity);
+                }
+        }
+    }
+
+
 
 }

@@ -44,7 +44,16 @@
 {% endfor %}
 <br>
 <h1> Favorite Songs </h1>
-{{ include('AppBundle:Default:stats_songs.html.twig') }}
+{% for song in topSongs %}
+        <a class="artist" title="{{ song.name }}" target="_blank" href="{{ song.external_urls.spotify }}">
+                <div class="images" style="background-image: url('{{ song.album.images.0.url }}');">
+                        <div class="title">
+                                <div title="{{ song.popularity }}"  class="pop" style="background-color: rgb({{ ((100.0 - song.popularity) * 2.55)|round }}, {{ (song.popularity * 2.55)|round }}, 0)"></div>
+                            {{ song.name }}
+                        </div>
+                </div>
+        </a>
+{% endfor %}
 <br>
 <a href="{{ path('homepage') }}">Return to index</a>
 </body>

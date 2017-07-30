@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -39,6 +40,20 @@ class Song
      * @ORM\JoinColumn(name="artist_id")
      */
     private $artist;
+
+    /**
+     * @var SongStats
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SongStats")
+     * @ORM\JoinColumn(name="stats_id", nullable=true)
+     */
+    private $stats;
+
+    /**
+     * @var Album
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Album")
+     * @ORM\JoinColumn(name="album_id", nullable=true)
+     */
+    private $album;
 
 
     public function __construct($id, $name, Artist $artist)
@@ -112,10 +127,48 @@ class Song
 
     /**
      * @param mixed $songId
+     * @return Song
      */
     public function setSongId($songId)
     {
         $this->songId = $songId;
+        return $this;
+    }
+
+    /**
+     * @param SongStats $stats
+     * @return Song
+     */
+    public function setStats(SongStats $stats)
+    {
+        $this->stats = $stats;
+        return $this;
+    }
+
+    /**
+     * @return SongStats
+     */
+    public function getStats()
+    {
+        return $this->stats;
+    }
+
+    /**
+     * @return Album
+     */
+    public function getAlbum()
+    {
+        return $this->album;
+    }
+
+    /**
+     * @param Album $album
+     * @return Song
+     */
+    public function setAlbum(Album $album)
+    {
+        $this->album = $album;
+        return $this;
     }
 
 }
