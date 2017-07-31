@@ -79,7 +79,7 @@ class FOSUBUserProvider implements UserProviderInterface, AccountConnectorInterf
         } elseif (null === $user) {
             $user = new User();
             $user->setEmail($response->getEmail())
-                ->setUsername($response->getRealName())
+                ->setUsername(empty($response->getRealName())?$username:$response->getRealName())
                 ->addRole("ROLE_USER")
                 ->setEnabled(true)
                 ->setLocked(false)

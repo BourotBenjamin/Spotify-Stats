@@ -1,7 +1,16 @@
 <style>
-        div {
+        .bar {
+                position: relative;
+                margin-top: 2px;
+                height: 20px;
+                color: white;
+                line-height:initial;
+                padding-left: 5px;
+        }
+        .segments {
                 line-height:0;
                 display: inline-flex;
+                height: 400px;
         }
         .segment {
                 margin-left: 1px;
@@ -11,7 +20,32 @@
 </style>
 
 <h1>{{ song.name }} - {{  song.artist.name }}</h1>
-<div style="height: 400px;">
+{% if song.stats != null %}
+<div class="stats">
+        <div class="bar" style="width: {{ song.stats.danceability * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.danceability * 255) | round  }},{{ (song.stats.danceability * 255) | round }}, 0)">Danceability : {{ song.stats.danceability }}</div>
+        <div class="bar" style="width: {{ song.stats.energy * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.energy * 255) | round  }},{{ (song.stats.energy * 255) | round }}, 0)">Energy : {{ song.stats.energy }}</div>
+        <div class="bar" style="width: {{ song.stats.valence * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.valence * 255) | round  }},{{ (song.stats.valence * 255) | round }}, 0)">Valence : {{ song.stats.valence }}</div>
+        <div class="bar" style="width: {{ song.stats.speechiness * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.speechiness * 255) | round  }},{{ (song.stats.speechiness * 255) | round }}, 0)">Speechiness : {{ song.stats.speechiness }}</div>
+        <div class="bar" style="width: {{ song.stats.acousticness * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.acousticness * 255) | round  }},{{ (song.stats.acousticness * 255) | round }}, 0)">Acousticness : {{ song.stats.acousticness }}</div>
+        <div class="bar" style="width: {{ song.stats.liveness * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.liveness * 255) | round  }},{{ (song.stats.liveness * 255) | round }}, 0)">Liveness : {{ song.stats.liveness }}</div>
+        <div class="bar" style="width: {{ song.stats.instrumentalness * 600 + 100 }}px; background-color: rgb(
+        {{ 255 - (song.stats.instrumentalness * 255) | round  }},{{ (song.stats.instrumentalness * 255) | round }}, 0)">Instrumentalness : {{ song.stats.instrumentalness }}</div>
+        <div class="bar" style="width: {{ ((song.stats.loudness + 60) / 60) * 600 + 100 }}px;background-color: rgb(
+        {{ 255 - (((song.stats.loudness + 60) / 60) * 255) | round  }},{{ (((song.stats.loudness + 60) / 60) * 255) | round }}, 0)">loudness : {{ song.stats.loudness }}</div>
+        <div class="bar" style="width: {{ song.stats.songKey * 60 + 100 }}px;background-color: rgb(
+        {{ 255 - ((song.stats.songKey / 10.0) * 255) | round  }},{{ ((song.stats.songKey / 10.0) * 255) | round }}, 0)">songKey : {{ song.stats.songKey }}</div>
+        <div class="bar" style="width: {{ song.stats.tempo * 3 + 100 }}px;background-color: rgb(
+        {{ 255 - ((song.stats.tempo / 200.0) * 255) | round  }},{{ ((song.stats.tempo / 200.0) * 255) | round }}, 0)">tempo : {{ song.stats.tempo }}</div>
+        <div>Genres :  {{ song.album.genres| join(', ') }} </div>
+</div>
+{% endif %}
+<div class="segments">
     {% for segment in stats.segments %}
         <div class="segment" style="
                 width: {{ segment.duration * 10 }}px;
