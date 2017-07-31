@@ -6,13 +6,17 @@
         height: 20px;
         width: 200px;
         background-color: darkred;
-        color: white;
         line-height:initial;
+        color: white;
+    }
+    .song, .song_unclassified {
+        display: block;
+        position: relative;
+        text-decoration: none;
+        color: black;
     }
     .song {
-        display: block;
         height: 50px;
-        position: relative;
     }
     .song-picture {
         height: 50px;
@@ -37,7 +41,7 @@
 </h3>
 <div class="top_songs">
     <h2>Your last songs</h2>
-    {% for playedSong in playedSongs if  playedSong.song.stats != null and  playedSong.song.stats.popularity is defined %}
+    {% for playedSong in playedSongs if  playedSong.song.stats != null and playedSong.song.stats.popularity is defined and playedSong.song.stats.danceability is defined %}
         <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}"
            data-danceability="{{ playedSong.song.stats.danceability }}"
            data-energy="{{ playedSong.song.stats.energy }}"
@@ -58,8 +62,8 @@
 </div>
 <h2>Unclassified songs</h2>
 {% for playedSong in playedSongs if  playedSong.song.stats == null or  playedSong.song.stats.popularity is not defined %}
-    <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
-        <div class="song-picture" {% if  playedSong.song.album.pictureUrl is defined %}style="background-image: url('{{ playedSong.song.album.pictureUrl }}');" {% endif %}></div>
+    <a class="song_unclassified" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
+        {% if  playedSong.song.album.pictureUrl is defined %} <div class="song-picture"style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div> {% endif %}
         <div>{{ playedSong.song.name }}</div>
     </a>
 {% endfor %}
@@ -94,3 +98,5 @@
 
 </script>
 <a href="{{ path('homepage') }}">Return to index</a>
+<br>
+<br>

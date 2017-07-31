@@ -41,8 +41,8 @@ class UpdateUserHistoryService
             $user->setToken($result["access_token"]);
         $this->em->persist($user);
         if($flush) {
-            $this->updateAlbumsGenres($user);
             $this->updateSongAlbumAndStats($user);
+            $this->updateAlbumsGenres($user);
             $this->em->flush();
         }
     }
@@ -54,8 +54,8 @@ class UpdateUserHistoryService
             $this->refreshToken($user);
             $this->updateUserHistory($user);
         }
-        $this->updateAlbumsGenres($users[0]);
         $this->updateSongAlbumAndStats($users[0]);
+        $this->updateAlbumsGenres($users[0]);
         $this->em->flush();
     }
 
