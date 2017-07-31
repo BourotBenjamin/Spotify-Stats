@@ -36,7 +36,8 @@
     </select>
 </h3>
 <div class="top_songs">
-    {% for playedSong in playedSongs %}
+    <h2>Your last songs</h2>
+    {% for playedSong in playedSongs if  playedSong.song.stats != null and  playedSong.song.stats.popularity is defined %}
         <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}"
            data-danceability="{{ playedSong.song.stats.danceability }}"
            data-energy="{{ playedSong.song.stats.energy }}"
@@ -55,6 +56,13 @@
         </a>
     {% endfor %}
 </div>
+<h2>Unclassified songs</h2>
+{% for playedSong in playedSongs if  playedSong.song.stats == null or  playedSong.song.stats.popularity is not defined %}
+    <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
+        <div class="song-picture" {% if  playedSong.song.album.pictureUrl is defined %}style="background-image: url('{{ playedSong.song.album.pictureUrl }}');" {% endif %}></div>
+        <div>{{ playedSong.song.name }}</div>
+    </a>
+{% endfor %}
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

@@ -67,7 +67,7 @@ hwi_oauth:
             type:                spotify
             client_id:           c8275b99fa0442b39929f62fbd39b1bc
             client_secret:       158b51306a214f94af3bd537c0325baf
-            scope: "user-read-recently-played user-top-read user-library-read user-follow-read user-read-private playlist-read-collaborative playlist-read-private"
+            scope: "user-read-recently-played user-top-read user-library-read user-follow-read user-read-private user-read-email playlist-read-collaborative playlist-read-private"
 
 fos_user:
     db_driver: orm # other valid values are 'mongodb', 'couchdb' and 'propel'
