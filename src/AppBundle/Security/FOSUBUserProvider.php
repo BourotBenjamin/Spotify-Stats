@@ -78,7 +78,7 @@ class FOSUBUserProvider implements UserProviderInterface, AccountConnectorInterf
             throw new AccountNotLinkedException(sprintf("User '%s' not found.", $username));
         } elseif (null === $user) {
             $user = new User();
-            $user->setEmail($response->getEmail())
+            $user->setEmail(empty($response->getEmail())?($username."@spotify.com"):$response->getEmail())
                 ->setUsername(empty($response->getRealName())?$username:$response->getRealName())
                 ->addRole("ROLE_USER")
                 ->setEnabled(true)
