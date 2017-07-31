@@ -23,7 +23,7 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(name="spotify_id", type="integer", unique=true)
+     * @ORM\Column(name="spotify_id", type="string", unique=true)
      */
     private $spotifyId;
 
