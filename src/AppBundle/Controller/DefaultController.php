@@ -22,14 +22,14 @@ class DefaultController extends Controller
 
 
     /**
-     * @Route("/", name="refesh")
+     * @Route("/refresh", name="refesh")
      */
     public function refreshAction(Request $request)
     {
         $user = $this->get('security.token_storage')->getToken()->getUser();
         $this->get("app.services.update_user_history_service")->refreshToken($user, true);
         $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
-        $this->indexAction($request);
+        return $this->indexAction($request);
     }
     /**
      * @Route("/", name="homepage")
