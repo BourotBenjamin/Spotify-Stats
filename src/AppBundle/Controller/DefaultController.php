@@ -22,6 +22,16 @@ class DefaultController extends Controller
 
 
     /**
+     * @Route("/", name="refesh")
+     */
+    public function refreshAction(Request $request)
+    {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->get("app.services.update_user_history_service")->refreshToken($user, true);
+        $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
+        $this->indexAction($request);
+    }
+    /**
      * @Route("/", name="homepage")
      */
     public function indexAction(Request $request)
@@ -30,11 +40,9 @@ class DefaultController extends Controller
             return $this->redirectToRoute('hwi_oauth_connect');
         $em = $this->getDoctrine()->getManager();
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        $this->get("app.services.update_user_history_service")->refreshToken($user, true);
-        $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
-
         return $this->render('AppBundle:Default:index.html.twig', array(
             "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
+            'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
         ));
     }
 

@@ -9,6 +9,9 @@ services:
         arguments:
             - '@fos_user.user_manager'
             - { spotify: 'spotifyId' }
+    app.services.update_users_achievements_service:
+        class: AppBundle\Services\UpdateUsersAchievementsService
+        arguments: ['@doctrine.orm.default_entity_manager']
     app.services.update_user_history_service:
         class: AppBundle\Services\UpdateUserHistoryService
-        arguments: ['@doctrine.orm.default_entity_manager', '@hwi_oauth.resource_owner.spotify']
+        arguments: ['@doctrine.orm.default_entity_manager', '@hwi_oauth.resource_owner.spotify', '@app.services.update_users_achievements_service']

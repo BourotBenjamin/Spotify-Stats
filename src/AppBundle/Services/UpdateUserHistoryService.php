@@ -24,15 +24,17 @@ class UpdateUserHistoryService
 
     private $em;
     private $spotify;
+    private $usersAchievements;
 
     /**
      * UpdateUserHistoryService constructor.
      * @param $em
      */
-    public function __construct(EntityManager $em, SpotifyResourceOwner $spotify)
+    public function __construct(EntityManager $em, SpotifyResourceOwner $spotify, UpdateUsersAchievementsService $usersAchievements)
     {
         $this->em = $em;
         $this->spotify = $spotify;
+        $this->usersAchievements = $usersAchievements;
     }
 
     function refreshToken(User $user, $flush = false) {
@@ -44,6 +46,7 @@ class UpdateUserHistoryService
             $this->updateSongAlbumAndStats($user);
             $this->updateAlbumsGenres($user);
             $this->em->flush();
+            $this->usersAchievements->updateAchievements();
         }
     }
 
@@ -57,6 +60,7 @@ class UpdateUserHistoryService
         $this->updateSongAlbumAndStats($users[0]);
         $this->updateAlbumsGenres($users[0]);
         $this->em->flush();
+        $this->usersAchievements->updateAchievements();
     }
 
     function updateUserHistory(User $user, $flush = false) {

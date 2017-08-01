@@ -1,8 +1,22 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
+<head>
+    <style type="text/css">
+        .achievement {
+            height: 50px;
+            width: 50px;
+            display: inline-block;
+        }
+    </style>
+</head>
 <body>
 Hi {{ app.user.username }} !<br>
 You have listen to <a href="{{ path('listened') }}">{{ count }} songs</a> since we know each others.<br>
 <a href="{{ path('stats') }}"> Want more stats ? :)</a>
+<div>
+    {% for achievement in achievements %}
+        <img class="achievement" src="{{ asset('images/achievements/'~achievement.achievement.imageUrl) }}" title="{{ achievement.achievement.name }}">
+    {% endfor %}
+</div>
 </body>
 </html>
