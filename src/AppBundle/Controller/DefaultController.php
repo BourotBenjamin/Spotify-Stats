@@ -16,6 +16,7 @@ use HWI\Bundle\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class DefaultController extends Controller
 {
@@ -31,15 +32,31 @@ class DefaultController extends Controller
         $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
         return $this->indexAction($request);
     }
+
+    /**
+     * @Route("/users", name="user_list")
+     */
+    public function usersAction(Request $request)
+    {
+        return $this->render('AppBundle:Default:user_list.html.twig', array(
+            'users' => $this->getDoctrine()->getManager()->getRepository("AppBundle:User")->findAll()
+        ));
+    }
     /**
      * @Route("/", name="homepage")
+     * @Route("/user/{id}", name="profile")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, $id = -1)
     {
         if(!$this->isGranted("IS_AUTHENTICATED_FULLY"))
             return $this->redirectToRoute('hwi_oauth_connect');
         $em = $this->getDoctrine()->getManager();
-        $user = $this->get('security.token_storage')->getToken()->getUser();
+        if($id == -1)
+            $user = $this->get('security.token_storage')->getToken()->getUser();
+        else
+            $user = $em->getRepository("AppBundle:User")->find($id);
+        if(!is_object($user))
+            throw new HttpException(404, 'User not found');
         return $this->render('AppBundle:Default:index.html.twig', array(
             "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
             'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
@@ -48,9 +65,16 @@ class DefaultController extends Controller
 
     /**
      * @Route("/stats", name="stats")
+     * @Route("/stats/{id}", name="user_stats")
      */
-    public function statsAction() {
-        $user = $this->get('security.token_storage')->getToken()->getUser();
+    public function statsAction(Request $request, $id = -1) {
+        $em = $this->getDoctrine()->getManager();
+        if($id == -1)
+            $user = $this->get('security.token_storage')->getToken()->getUser();
+        else
+            $user = $em->getRepository("AppBundle:User")->find($id);
+        if(!is_object($user))
+            throw new HttpException(404, 'User not found');
         $this->get("app.services.update_user_history_service")->refreshToken($user, true);
 
         $ch = curl_init("https://api.spotify.com/v1/me/top/artists?limit=50");
@@ -78,10 +102,16 @@ class DefaultController extends Controller
 
     /**
      * @Route("/listened", name="listened")
+     * @Route("/listened/{id}", name="user_listened")
      */
-    public function listenedAction() {
+    public function listenedAction(Request $request, $id = -1) {
         $em = $this->getDoctrine()->getManager();
-        $user = $this->get('security.token_storage')->getToken()->getUser();
+        if($id == -1)
+            $user = $this->get('security.token_storage')->getToken()->getUser();
+        else
+            $user = $em->getRepository("AppBundle:User")->find($id);
+        if(!is_object($user))
+            throw new HttpException(404, 'User not found');
         $playedSongs = $em->getRepository("AppBundle:PlayedSong")->findBy(array("user"=> $user));
         return $this->render('AppBundle:Default:stats_songs.html.twig', array(
             "playedSongs" => $playedSongs,
