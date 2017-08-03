@@ -43,10 +43,7 @@ class UpdateUserHistoryService
             $user->setToken($result["access_token"]);
         $this->em->persist($user);
         if($flush) {
-            $this->updateSongAlbumAndStats($user);
-            $this->updateAlbumsGenres($user);
             $this->em->flush();
-            $this->usersAchievements->updateAchievements();
         }
     }
 
@@ -115,8 +112,12 @@ class UpdateUserHistoryService
                 if(isset($api_response["cursors"]["after"]))
                     $user->setLastFetch($api_response["cursors"]["after"]);
                 $this->em->persist($user);
-                if ($flush)
+                if ($flush) {
+                    $this->updateSongAlbumAndStats($user);
+                    $this->updateAlbumsGenres($user);
                     $this->em->flush();
+                    $this->usersAchievements->updateAchievements();
+                }
             }
     }
 
