@@ -23,7 +23,7 @@ class PlayedSong
 
     /**
      * @var Song
-     * @ORM\ManyToOne(targetEntity="Song")
+     * @ORM\ManyToOne(targetEntity="Song", fetch="EAGER")
      * @ORM\JoinColumn(name="song_id")
      */
     private $song;

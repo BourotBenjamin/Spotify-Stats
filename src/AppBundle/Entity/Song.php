@@ -43,14 +43,14 @@ class Song
 
     /**
      * @var SongStats
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SongStats")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SongStats", fetch="EAGER")
      * @ORM\JoinColumn(name="stats_id", nullable=true)
      */
     private $stats;
 
     /**
      * @var Album
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Album")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Album", fetch="EAGER")
      * @ORM\JoinColumn(name="album_id", nullable=true)
      */
     private $album;

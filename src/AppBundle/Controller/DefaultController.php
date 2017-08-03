@@ -28,7 +28,7 @@ class DefaultController extends Controller
     public function refreshAction(Request $request)
     {
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        $this->get("app.services.update_user_history_service")->refreshToken($user, true);
+        $this->get("app.services.update_user_history_service")->refreshToken($user, false);
         $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
         return $this->indexAction($request);
     }
