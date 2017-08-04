@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -35,6 +36,11 @@ class Artist
      */
     private $name;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Genre")
+     */
+    private $genres;
 
     public function __construct($artistId, $name)
     {
@@ -50,6 +56,14 @@ class Artist
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getArtistId()
+    {
+        return $this->artistId;
     }
 
     /**
@@ -74,4 +88,35 @@ class Artist
     {
         return $this->name;
     }
+
+    /**
+     * @param ArrayCollection $genres
+     * @return  Artist
+     */
+    public function setGenres(ArrayCollection $genres)
+    {
+        $this->genres = $genres;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getGenres()
+    {
+        return $this->genres;
+    }
+
+    public function addGenre(Genre $genre) {
+        if(!$this->genres->contains($genre))
+            $this->genres[] = $genre;
+        return $this;
+    }
+
+
+    public function removeGenre(Genre $genre) {
+        $this->genres->removeElement($genre);
+        return $this;
+    }
+
 }

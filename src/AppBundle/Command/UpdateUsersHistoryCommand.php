@@ -14,7 +14,7 @@ class UpdateUsersHistoryCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('app:users:update_history')
+            ->setName('app:update:history')
             ->setDescription('Update users listened history');
     }
 

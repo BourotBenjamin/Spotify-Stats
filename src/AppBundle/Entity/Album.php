@@ -41,12 +41,6 @@ class Album
      */
     private $pictureUrl;
 
-    /**
-     * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Genre")
-     * @ORM\JoinColumn(name="artist_id")
-     */
-    private $genres;
 
     /**
      * Album constructor.
@@ -78,37 +72,6 @@ class Album
     public function setAlbumId($albumId)
     {
         $this->albumId = $albumId;
-        return $this;
-    }
-
-
-    /**
-     * @param ArrayCollection $genres
-     * @return  Album
-     */
-    public function setGenres(ArrayCollection $genres)
-    {
-        $this->genres = $genres;
-        return $this;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getGenres()
-    {
-        return $this->genres;
-    }
-
-    public function addGenre(Genre $genre) {
-        if(!$this->genres->contains($genre))
-            $this->genres[] = $genre;
-        return $this;
-    }
-
-
-    public function removeGenre(Genre $genre) {
-        $this->genres->removeElement($genre);
         return $this;
     }
 

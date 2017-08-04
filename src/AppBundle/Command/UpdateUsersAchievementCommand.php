@@ -14,7 +14,7 @@ class UpdateUsersAchievementCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('app:users:achievements')
+            ->setName('app:update:achievements')
             ->setDescription('Achievements');
     }
 
