@@ -75,7 +75,6 @@
     function updateStats() {
         var dataname = $(".song-sort").val();
         $songs =  $(".top_songs");
-        $songs.appendTo($songs);
         $('.top_songs').html($songs.html());
         var min = Math.min.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
         var max = Math.max.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));

@@ -19,4 +19,22 @@ class UserRepository extends EntityRepository
         $rsm->addScalarResult("count", "count");
         return $this->getEntityManager()->createNativeQuery("SELECT COUNT(*) count FROM played__song WHERE user_id = ?", $rsm) ->setParameters(array($userId))->getSingleScalarResult();
     }
+
+    public function getGenresListenedByUser($userId) {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("count", "count");
+        $rsm->addScalarResult("name", "name");
+        $sql = <<< SQL
+        SELECT genre.name, COUNT(*) count
+        FROM played__song
+        JOIN song ON played__song.song_id = song.id
+        JOIN artist ON song.artist_id = artist.id
+        JOIN artist_genre ON artist.id = artist_genre.artist_id
+        JOIN genre
+        WHERE played__song.user_id = ? 
+        GROUP BY genre.id
+        ORDER BY count
+SQL;
+        return $this->getEntityManager()->createNativeQuery($sql, $rsm) ->setParameters(array($userId))->getScalarResult();
+    }
 }

@@ -1,0 +1,38 @@
+
+<div class="top_genres">
+    <h2>Your top genres</h2>
+    {% for genre in genres %}
+        <a class="genre" title="{{ genres.name }}" data-cnt="{{ genres.count }}">
+            <div class="bar">{{ genres.name }}</div>
+        </a>
+    {% endfor %}
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+
+    function updateStats() {
+        var dataname = "cnt";
+        $genres =  $(".top_genres");
+        $('.top_genres').html($genres.html());
+        var min = Math.min.apply(Math, $('.genre').map(function() { return parseFloat($(this).data(dataname)); } ));
+        var max = Math.max.apply(Math, $('.genre').map(function() { return parseFloat($(this).data(dataname)); } ));
+        $('.genre').sort(function(a, b) {
+            return parseFloat($(b).data(dataname)) - parseFloat($(a).data(dataname));
+        }).appendTo($('.top_genres')).each( function ()  {
+            var pcent = ( parseFloat($(this).data(dataname)) - min ) / (max - min);
+            $(this).find(".bar").attr('title', $(this).data(dataname)).css('width', ( pcent * 600 + 200 )+"px")
+                .css("background-color", 'rgb('+
+                    parseInt( 255 - (pcent * 255) )+','+
+                    parseInt( pcent * 255 )+','+
+                    '0)'
+                );
+        });
+    }
+    updateStats();
+
+</script>
+<a href="{{ path('homepage') }}">Return to index</a>
+<br>
+<br>

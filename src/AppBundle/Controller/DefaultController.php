@@ -58,6 +58,7 @@ class DefaultController extends Controller
         if(!is_object($user))
             throw new HttpException(404, 'User not found');
         return $this->render('AppBundle:Default:index.html.twig', array(
+            "user" => $user,
             "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
             'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
         ));
@@ -115,6 +116,22 @@ class DefaultController extends Controller
         $playedSongs = $em->getRepository("AppBundle:PlayedSong")->findBy(array("user"=> $user));
         return $this->render('AppBundle:Default:stats_songs.html.twig', array(
             "playedSongs" => $playedSongs,
+        ));
+    }
+
+    /**
+     * @Route("/genres", name="genres")
+     * @Route("/genres/{id}", name="user_genres")
+     */
+    public function genresAction(Request $request, $id = -1) {
+        $em = $this->getDoctrine()->getManager();
+        if($id == -1)
+            $user = $this->get('security.token_storage')->getToken()->getUser();
+        else
+            $user = $em->getRepository("AppBundle:User")->find($id);
+        $genres = $em->getRepository("AppBundle:User")->getGenresListenedByUser($user->getId());
+        return $this->render('@App/Default/stats_genres.html.twig', array(
+            "genres" => $genres,
         ));
     }
 
