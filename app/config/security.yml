@@ -33,6 +33,7 @@ security:
 
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/connect/spotify, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login/check-spotify, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/[a-z], roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
