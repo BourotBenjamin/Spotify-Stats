@@ -132,6 +132,7 @@ class DefaultController extends Controller
         $genres = $em->getRepository("AppBundle:User")->getGenresListenedByUser($user->getId());
         return $this->render('@App/Default/stats_genres.html.twig', array(
             "genres" => $genres,
+            "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
         ));
     }
 

@@ -2,6 +2,7 @@
     .bar {
         height: 20px;
         width: 200px;
+        margin-left: 5px;
         background-color: darkred;
         line-height:initial;
         color: white;
@@ -17,7 +18,7 @@
     <h2>Your top genres</h2>
     {% for genre in genres %}
         <a class="genre" title="{{ genre.name }}" data-cnt="{{ genre.count }}">
-            <div class="bar"> {{ genre.name }} </div>
+            <div class="bar"> {{ genre.name }} ( {{ (count / genre.count) * 100 }} ) </div>
         </a>
     {% endfor %}
 </div>
@@ -36,7 +37,7 @@
             return parseFloat($(b).data(dataname)) - parseFloat($(a).data(dataname));
         }).appendTo($('.top_genres')).each( function ()  {
             var pcent = ( parseFloat($(this).data(dataname)) - min ) / (max - min);
-            $(this).find(".bar").attr('title', $(this).data(dataname)+" ("+( pcent * 100 )+"%)").css('width', ( pcent * 600 + 200 )+"px")
+            $(this).find(".bar").attr('title', $(this).data(dataname)).css('width', ( pcent * 600 + 200 )+"px")
                 .css("background-color", 'rgb('+
                     parseInt( 255 - (pcent * 255) )+','+
                     parseInt( pcent * 255 )+','+
