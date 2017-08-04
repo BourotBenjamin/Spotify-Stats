@@ -1,5 +1,10 @@
+<table>
 {% for user in users %}
-    <a href="{{ path('profile', {'id': user.id}) }}">{{ user.username }}</a>
-    <a href="{{ path('user_stats', {'id': user.id}) }}">Stats</a>
-    <a href="{{ path('user_listened', {'id': user.id}) }}">Listened</a><br>
+    <tr>
+        <td><a href="{{ path('profile', {'id': user.id}) }}">{{ user.username }}</a></td>
+        <td><a href="{{ path('user_stats', {'id': user.id}) }}">Stats</a></td>
+        <td><a href="{{ path('user_listened', {'id': user.id}) }}">Listened</a></td>
+        <td><a href="{{ path('genres', {'id': user.id}) }}">Genres</a></td>
+    </tr>
 {% endfor %}
+</table>

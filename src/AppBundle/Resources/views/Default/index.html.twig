@@ -10,13 +10,17 @@
     </style>
 </head>
 <body>
-Hi {{ user.username }} !<br>
-You have listen to <a href="{{ path('listened') }}">{{ count }} songs</a> since we know each others.<br>
-<a href="{{ path('stats') }}"> Want more stats ? :)</a>
+<h1>Hi {{ user.username }} !</h1>
+<h3>You have listen to <a href="{{ path('listened') }}">{{ count }} songs</a> since we know each others.</h3>
+<h3><a href="{{ path('stats') }}"> Want more stats ? :)</a></h3>
+<h3><a href="{{ path('genres') }}"> Even more ? :)</a></h3>
+<h4><div>I probably should create a profile page. Should I ?</div></h4>
+<h4><div>You thought you were <a href="{{ path('user_list') }}">alone</a> ? Really ?</div></h4>
 <div>
     {% for achievement in achievements %}
         <img class="achievement" src="{{ asset('images/achievements/'~achievement.achievement.imageUrl) }}" title="{{ achievement.achievement.name }}">
     {% endfor %}
 </div>
+<h6>Hosted in Montreuil. 9-3 RPZ. Thug Life !</h6>
 </body>
 </html>
