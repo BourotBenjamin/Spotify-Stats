@@ -23,9 +23,11 @@ class UpdateSongsCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $user = $this->getContainer()->get("doctrine")->getManager()->getRepository("AppBundle:User")->find(1);
+        $em =  $this->getContainer()->get("doctrine")->getManager();
+        $user =$em->getRepository("AppBundle:User")->find(1);
         $this->getContainer()->get('app.services.update_songs_service')->updateSongStats($user);
         $this->getContainer()->get('app.services.update_songs_service')->updateSongAlbumAndPopularity($user);
         $this->getContainer()->get('app.services.update_songs_service')->updateArtistsGenres($user);
+        $em->flush();
     }
 }

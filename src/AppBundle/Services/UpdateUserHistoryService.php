@@ -55,7 +55,6 @@ class UpdateUserHistoryService
             $this->updateUserHistory($user);
         }
         $this->em->flush();
-        $this->usersAchievements->updateAchievements();
     }
 
     function updateUserHistory(User $user, $flush = false) {
