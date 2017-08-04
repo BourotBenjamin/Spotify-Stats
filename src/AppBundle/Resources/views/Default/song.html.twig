@@ -44,7 +44,7 @@
         {{ 255 - ((song.stats.songKey / 10.0) * 255) | round  }},{{ ((song.stats.songKey / 10.0) * 255) | round }}, 0)">songKey : {{ song.stats.songKey }}</div>
         <div class="bar" style="width: {{ song.stats.tempo * 3 + 150 }}px;background-color: rgb(
         {{ 255 - ((song.stats.tempo / 200.0) * 255) | round  }},{{ ((song.stats.tempo / 200.0) * 255) | round }}, 0)">tempo : {{ song.stats.tempo }}</div>
-        <div>Genres :  {{ song.album.genres| join(', ') }} </div>
+        <div>Genres :  {{ song.artist.genres| join(', ') }} </div>
 </div>
 {% endif %}
 <div class="segments">
