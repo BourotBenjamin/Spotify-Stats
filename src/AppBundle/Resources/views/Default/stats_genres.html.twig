@@ -2,8 +2,8 @@
 <div class="top_genres">
     <h2>Your top genres</h2>
     {% for genre in genres %}
-        <a class="genre" title="{{ genres.name }}" data-cnt="{{ genres.count }}">
-            <div class="bar">{{ genres.name }}</div>
+        <a class="genre" title="{{ genre.name }}" data-cnt="{{ genre.count }}">
+            <div class="bar">{{ genre.name }}</div>
         </a>
     {% endfor %}
 </div>
