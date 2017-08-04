@@ -18,7 +18,7 @@
     <h2>Your top genres</h2>
     {% for genre in genres %}
         <a class="genre" title="{{ genre.name }}" data-cnt="{{ genre.count }}">
-            <div class="bar"> {{ genre.name }} ( {{ (count / genre.count) * 100 }} ) </div>
+            <div class="bar"> {{ genre.name }} ( {{ ((genre.count / count) * 100) |number_format(2) }} ) </div>
         </a>
     {% endfor %}
 </div>
