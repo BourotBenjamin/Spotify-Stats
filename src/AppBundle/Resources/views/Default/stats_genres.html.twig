@@ -1,4 +1,20 @@
-
+<style>
+    .bar {
+        position: absolute;
+        top: 15px;
+        left: 55px;
+        height: 20px;
+        width: 200px;
+        background-color: darkred;
+        line-height:initial;
+        color: white;
+    }
+    .genre {
+        display: block;
+        position: relative;
+        text-decoration: none;
+    }
+</style>
 <div class="top_genres">
     <h2>Your top genres</h2>
     {% for genre in genres %}
