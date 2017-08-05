@@ -85,13 +85,13 @@ class UpdateSongsService
             foreach ($artistsInfos as $artistInfos) {
                 $artist = $artistsByIds[$artistInfos['id']];
                 foreach ($artistInfos['genres'] as $genreName) {
-                    if (isset($genres[$genreName]))
-                        $genre = $genres[$genreName];
+                    if (isset($genresByNames[$genreName]))
+                        $genre = $genresByNames[$genreName];
                     else {
                         $genre = new Genre();
                         $genre->setName($genreName);
                         $this->em->persist($genre);
-                        $genres[$genreName] = $genre;
+                        $genresByNames[$genreName] = $genre;
                     }
                     $artist->addGenre($genre);
                 }
