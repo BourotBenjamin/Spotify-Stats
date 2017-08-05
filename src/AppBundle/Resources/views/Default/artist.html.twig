@@ -33,7 +33,9 @@
     {{ genre }} ,
 {% endfor %}
 
-<h3><a href="http://bandsintown.com/{{ artist.name | url_encode }}">Conserts</a></h3>
-{% for country, number in concertsByCountries %}
-    {{ country }} : {{ number }} Concerts.<br>
-{% endfor %}
+{% if concertsByCountries | length > 0 %}
+    <h3><a href="http://bandsintown.com/{{ artist.name | url_encode }}">Concerts</a></h3>
+    {% for country, number in concertsByCountries %}
+        {{ country }} : {{ number }} Concerts.<br>
+    {% endfor %}
+{% endif %}
