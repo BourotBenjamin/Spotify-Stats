@@ -36,7 +36,7 @@ SQL;
             SELECT p.song_id
             FROM played__song p
             WHERE p.user_id = ?
-            ORDER BY count DESC, song_id DESC 
+            ORDER BY count DESC, p.id DESC 
             LIMIT 50
 SQL;
         $ids = $this->getEntityManager()

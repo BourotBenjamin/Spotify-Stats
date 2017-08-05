@@ -18,12 +18,12 @@ class ArtistRepository extends EntityRepository
         $rsm = new ResultSetMapping();
         $rsm->addScalarResult("artist_id", "artist_id");
         $sql = <<< SQL
-            SELECT SUM(count) total, s.artist_id
+            SELECT SUM(count) total, MAX(p.id) max, s.artist_id
             FROM played__song p
             JOIN song s ON p.song_id = s.id
             WHERE p.user_id = ?
             GROUP BY s.artist_id
-            ORDER BY total DESC, s.artist_id DESC 
+            ORDER BY total DESC, max DESC 
             LIMIT 50
 SQL;
         $ids = $this->getEntityManager()
