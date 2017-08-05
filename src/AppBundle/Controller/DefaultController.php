@@ -147,7 +147,6 @@ class DefaultController extends Controller
     public function songAction($id) {
         $em = $this->getDoctrine()->getManager();
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        //$this->get("app.services.update_user_history_service")->refreshToken($user, true);
         $song = $em->getRepository("AppBundle:Song")->find($id);
         $stats = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/audio-analysis/".$song->getSongId(), $user);
         $popularities = $em->getRepository('AppBundle:SongPopularity')->findBy(array("song" => $song));
@@ -155,6 +154,22 @@ class DefaultController extends Controller
             "stats" => $stats,
             "song" => $song,
             "popularities" => $popularities,
+        ));
+    }
+    /**
+     * @Route("/artist/{id}", name="artist")
+     */
+    public function artistAction($id) {
+        $em = $this->getDoctrine()->getManager();
+        $artist = $em->getRepository("AppBundle:Artist")->find($id);
+        $concerts = $this->get('app.services.spotify_api_service')->getExternalContent( "https://rest.bandsintown.com/artists/".urlencode($artist->getName())."/events?app_id=philoupe%2F1.0%20%28%2Bhttp%3A%2F%2Fphiloupe.ddns.net%2F%29");
+        $conertsByCountries = array();
+        foreach ($concerts as $concert)
+            $conertsByCountries[$concert["venue"]["country"]] = 1 + ($conertsByCountries[$concert["venue"]["country"]] ?? 0);
+        return $this->render('AppBundle:Default:artist.html.twig', array(
+            "artist" => $artist,
+            "conerts" => $concerts,
+            "concertsByCountries" => $conertsByCountries
         ));
     }
 

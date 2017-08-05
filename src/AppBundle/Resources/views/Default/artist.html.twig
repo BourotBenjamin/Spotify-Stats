@@ -1,0 +1,39 @@
+<style>
+    .artist {
+        display: inline-flex;
+    }
+    a {
+        text-decoration: none;
+    }
+    .images {
+        position: relative;
+        height: 300px;
+        width: 300px;
+        background-size: cover;
+    }
+    .title {
+        color: white;
+        background: rgba(0,0,0,0.5);
+        padding: 5px;
+        line-height:initial;
+        font-size: 24px;
+    }
+</style>
+
+<a class="artist" title="{{ artist.name }}" target="_blank" >
+    <div class="images" style="background-image: url('{{ artist.pictureUrl }}');">
+        <div class="title">
+            {{ artist.name }}
+        </div>
+    </div>
+</a>
+
+<h3>Genres</h3>
+{% for genre in artist.genres %}
+    {{ genre }} ,
+{% endfor %}
+
+<h3><a href="http://bandsintown.com/{{ artist.name | url_encode }}">Conserts</a></h3>
+{% for country, number in concertsByCountries %}
+    {{ country }} : {{ number }} Concerts.<br>
+{% endfor %}
