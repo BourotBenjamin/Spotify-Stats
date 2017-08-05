@@ -19,7 +19,7 @@
         }
 </style>
 
-<h1>{{ song.name }} - <a href="{{ path('artist', {'id': {{  song.artist.id }}}) }}">{{  song.artist.name }}</a></h1>
+<h1>{{ song.name }} - <a href="{{ path('artist', {'id':  song.artist.id }) }}">{{  song.artist.name }}</a></h1>
 {% if song.stats != null and song.stats.danceability is defined %}
 <div class="stats">
         <div class="bar" style="width: {{ song.stats.danceability * 6 + 150 }}px; background-color: rgb(
