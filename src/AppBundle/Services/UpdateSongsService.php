@@ -95,6 +95,8 @@ class UpdateSongsService
                     }
                     $artist->addGenre($genre);
                 }
+                if(isset($artistInfos['images'][0]))
+                    $artist->setPictureUrl($artistInfos['images'][0]['url']);
                 $this->em->persist($artist);
             }
         }
@@ -124,14 +126,18 @@ class UpdateSongsService
                 if(!empty($song))
                 {
                     $songEntity = $songsByIds[$song["id"]];
-                    if(!isset($albumsByIds[$song["album"]['id']])) {
-                        $albumsByIds[$song["album"]['id']] = new Album(
-                            $song["album"]['id'],
-                            $song["album"]['name'],
-                            $song["album"]['images'][0]['url']);
+                    if(!is_object($songEntity->getAlbum())) {
+                        if (!isset($albumsByIds[$song["album"]['id']])) {
+                            $albumsByIds[$song["album"]['id']] = new Album(
+                                $song["album"]['id'],
+                                $song["album"]['name'],
+                                $song["album"]['images'][0]['url']);
+                            $this->em->persist($albumsByIds[$song["album"]['id']]);
+                        }
+                        $songEntity->setAlbum($albumsByIds[$song["album"]['id']]);
+                        $albumsByIds[$song["album"]['id']]->setType($song["album"]['type']);
                         $this->em->persist($albumsByIds[$song["album"]['id']]);
                     }
-                    $songEntity->setAlbum($albumsByIds[$song["album"]['id']]);
                     if(($popularitiesById[$songEntity->getId()] ?? 0) != $song['popularity']) {
                         if (is_object($songStats = $songEntity->getStats())) {
                             $songStats->setPopularity($song['popularity']);

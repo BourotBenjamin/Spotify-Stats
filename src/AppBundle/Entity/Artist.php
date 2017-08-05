@@ -15,7 +15,6 @@ class Artist
 {
     /**
      * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -24,17 +23,21 @@ class Artist
 
     /**
      * @var string
-     *
      * @ORM\Column(name="artist_id", type="string", length=255)
      */
     private $artistId;
 
     /**
      * @var string
-     *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
+
+    /**
+     * @var string
+     * @ORM\Column(name="picture_url", type="string", length=255, nullable=true)
+     */
+    private $pictureUrl;
 
     /**
      * @var ArrayCollection
@@ -117,6 +120,22 @@ class Artist
     public function removeGenre(Genre $genre) {
         $this->genres->removeElement($genre);
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPictureUrl()
+    {
+        return $this->pictureUrl;
+    }
+
+    /**
+     * @param string $pictureUrl
+     */
+    public function setPictureUrl($pictureUrl)
+    {
+        $this->pictureUrl = $pictureUrl;
     }
 
 }

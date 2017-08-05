@@ -37,9 +37,15 @@ class Album
     private $name;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      */
     private $pictureUrl;
+
+    /**
+     * @var string
+     * @ORM\Column(name="type", type="string", length=255)
+     */
+    private $type;
 
 
     /**
@@ -81,6 +87,14 @@ class Album
     public function getPictureUrl()
     {
         return $this->pictureUrl;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 
 }

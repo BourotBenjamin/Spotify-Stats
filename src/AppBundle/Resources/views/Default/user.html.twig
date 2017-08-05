@@ -1,0 +1,68 @@
+<html>
+<body>
+<style>
+    .pop {
+        height: 10px;
+        width: 10px;
+        padding: 0px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .artist {
+        display: inline-flex;
+    }
+    a {
+        text-decoration: none;
+    }
+    .images {
+        position: relative;
+        height: 150px;
+        width: 150px;
+        background-size: cover;
+    }
+    .title {
+        color: white;
+        background: rgba(0,0,0,0.5);
+        padding: 5px;
+        line-height:initial;
+    }
+    div {
+        line-height:0;
+    }
+</style>
+<h1>{{ user.username }}</h1>
+
+<h2>Badges</h2>
+{% for achievement in achievements %}
+    <img class="achievement" src="{{ asset('images/achievements/'~achievement.achievement.imageUrl) }}" title="{{ achievement.achievement.name }}">
+{% endfor %}
+
+<h2>Artists</h2>
+{% for artist in artists %}
+    <a class="artist" title="{{ artist.name }}" target="_blank">
+        <div class="images" style="background-image: url('{{ artist.pictureUrl }}');">
+            <div class="title">
+                {{ artist.name }}
+            </div>
+        </div>
+    </a>
+{% endfor %}
+
+
+<h2>Songs</h2>
+{% for song in songs %}
+    <a class="artist" title="{{ song.name }}" target="_blank">
+        <div class="images" style="background-image: url('{{ song.album.pictureUrl }}');">
+            <div class="title">
+                {{ song.name }}
+            </div>
+        </div>
+    </a>
+{% endfor %}
+
+<h2>Genres</h2>
+{% for achievement in achievements %}
+    <img class="achievement" src="{{ asset('images/achievements/'~achievement.achievement.imageUrl) }}" title="{{ achievement.achievement.name }}">
+{% endfor %}
+</body>
+</html>

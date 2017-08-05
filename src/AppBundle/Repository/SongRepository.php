@@ -28,4 +28,22 @@ SQL;
             ->getScalarResult();
     }
 
+
+    public function getTopSongsByUser($userId) {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("song_id", "song_id");
+        $sql = <<< SQL
+            SELECT p.song_id
+            FROM played__song p
+            WHERE p.user_id = ?
+            ORDER BY count DESC, song_id DESC 
+            LIMIT 50
+SQL;
+        $ids = $this->getEntityManager()
+            ->createNativeQuery($sql, $rsm)
+            ->setParameters([$userId])
+            ->getScalarResult();
+        return $this->findBy(["id" => array_column($ids, "song_id")]);
+    }
+
 }

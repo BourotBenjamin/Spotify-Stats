@@ -43,7 +43,6 @@ class DefaultController extends Controller
     }
     /**
      * @Route("/", name="homepage")
-     * @Route("/user/{id}", name="profile")
      */
     public function indexAction(Request $request, $id = -1)
     {
@@ -59,6 +58,30 @@ class DefaultController extends Controller
         return $this->render('AppBundle:Default:index.html.twig', array(
             "user" => $user,
             "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
+            'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
+        ));
+    }
+
+    /**
+     * @Route("/user/{id}", name="profile")
+     */
+    public function profileAction(Request $request, $id = -1)
+    {
+        if(!$this->isGranted("IS_AUTHENTICATED_FULLY"))
+            return $this->redirectToRoute('hwi_oauth_connect');
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository("AppBundle:User")->find($id);
+        $genres = $em->getRepository("AppBundle:User")->getTopGenresByUser($user->getId());
+        $artists = $em->getRepository("AppBundle:Artist")->getTopArtistsByUser($user->getId());
+        $songs = $em->getRepository("AppBundle:Song")->getTopSongsByUser($user->getId());
+        if(!is_object($user))
+            throw new HttpException(404, 'User not found');
+        return $this->render('AppBundle:Default:user.html.twig', array(
+            "user" => $user,
+            "count" => $em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
+            "genres" => $genres,
+            "artists" => $artists,
+            "songs" => $songs,
             'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
         ));
     }

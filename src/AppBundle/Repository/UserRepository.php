@@ -37,4 +37,23 @@ class UserRepository extends EntityRepository
 SQL;
         return $this->getEntityManager()->createNativeQuery($sql, $rsm) ->setParameters(array($userId))->getScalarResult();
     }
+
+
+    public function getTopGenresByUser($userId) {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("name", "name");
+        $sql = <<< SQL
+        SELECT genre.name, SUM(played__song.count) count
+        FROM played__song
+        JOIN song ON played__song.song_id = song.id
+        JOIN artist ON song.artist_id = artist.id
+        JOIN artist_genre ON artist.id = artist_genre.artist_id
+        JOIN genre ON artist_genre.genre_id = genre.id
+        WHERE played__song.user_id = ? 
+        GROUP BY genre.id
+        ORDER BY count
+        LIMIT 5
+SQL;
+        return $this->getEntityManager()->createNativeQuery($sql, $rsm) ->setParameters(array($userId))->getScalarResult();
+    }
 }
