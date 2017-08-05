@@ -61,8 +61,8 @@
 {% endfor %}
 
 <h2>Genres</h2>
-{% for achievement in achievements %}
-    <img class="achievement" src="{{ asset('images/achievements/'~achievement.achievement.imageUrl) }}" title="{{ achievement.achievement.name }}">
+{% for genre in genre %}
+    {{ genre }},
 {% endfor %}
 </body>
 </html>
