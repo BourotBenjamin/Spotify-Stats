@@ -41,7 +41,7 @@
 </h3>
 <div class="top_songs">
     <h2>Your last songs</h2>
-    {% for playedSong in playedSongs if playedSong.song.stats != null and playedSong.song.stats.danceability is defined and playedSong.song.stats.popularity != null  %}
+    {% for playedSong in playedSongs if playedSong.song.stats is not null and playedSong.song.stats.danceability is defined and playedSong.song.stats.popularity is not null  %}
         <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}"
            data-danceability="{{ playedSong.song.stats.danceability }}"
            data-energy="{{ playedSong.song.stats.energy }}"
@@ -61,7 +61,7 @@
     {% endfor %}
 </div>
 <h2>Unclassified songs</h2>
-{% for playedSong in playedSongs if playedSong.song.stats == null or playedSong.song.stats.danceability is not defined or playedSong.song.stats.popularity == null %}
+{% for playedSong in playedSongs if playedSong.song.stats is null or playedSong.song.stats.danceability is not defined or playedSong.song.stats.popularity is null %}
     <a class="song_unclassified" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
         {% if  playedSong.song.album.pictureUrl is defined %} <div class="song-picture"style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div> {% endif %}
         <div>{{ playedSong.song.name }}</div>
