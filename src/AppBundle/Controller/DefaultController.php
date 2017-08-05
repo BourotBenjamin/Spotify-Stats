@@ -162,7 +162,6 @@ class DefaultController extends Controller
     public function artistAction($id) {
         $em = $this->getDoctrine()->getManager();
         $artist = $em->getRepository("AppBundle:Artist")->find($id);
-        echo(urlencode($artist->getName()));
         $concerts = $this->get('app.services.spotify_api_service')->getExternalContent( "https://rest.bandsintown.com/artists/"
             .str_replace('+', '%20', urlencode($artist->getName()))
             ."/events?app_id=philoupe%2F1.0%20%28%2Bhttp%3A%2F%2Fphiloupe.ddns.net%2F%29");
