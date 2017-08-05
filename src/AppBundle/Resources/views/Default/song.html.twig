@@ -56,6 +56,7 @@
                 " ></div>
     {% endfor %}
 </div>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 <a href="{{ path('homepage') }}">Return to index</a>
 
 
@@ -68,4 +69,40 @@
     ga('create', 'UA-48763424-2', 'auto');
     ga('send', 'pageview');
 
+</script>
+<script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script type="text/javascript">
+    window.onload = function () {
+        var chart = new CanvasJS.Chart("chartContainer",
+            {
+                title:{
+                    text: "Popularity"
+                },
+                axisX:{
+                    title: "timeline",
+                    gridThickness: 2
+                },
+                data: [
+                    {
+                        type: "area",
+                        dataPoints: [//array
+                            {% set minimum = 100 %}
+                            {% set maximum = 0 %}
+                            {% for popularity in popularities %}
+                            { x: new Date({{ popularity.createdAt | date('Y, m, d') }}), y: {{ popularity.popularity }}},
+                            {% if maximum < popularity.popularity %} {% set maximum = popularity.popularity %}{% endif %}
+                            {% if minimum > popularity.popularity %} {% set minimum = popularity.popularity %}{% endif %}
+                            {% endfor %}
+                        ],
+                    }
+                ],
+                axisY: {
+                    title: "%",
+                    minimum: {{ minimum - 1 }},
+                    maximum: {{ maximum + 1 }}
+                }
+            });
+
+        chart.render();
+    }
 </script>

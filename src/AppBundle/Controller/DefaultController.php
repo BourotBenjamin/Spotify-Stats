@@ -28,7 +28,6 @@ class DefaultController extends Controller
     public function refreshAction(Request $request)
     {
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        $this->get("app.services.update_user_history_service")->refreshToken($user, false);
         $this->get("app.services.update_user_history_service")->updateUserHistory($user, true);
         return $this->indexAction($request);
     }
@@ -76,25 +75,8 @@ class DefaultController extends Controller
             $user = $em->getRepository("AppBundle:User")->find($id);
         if(!is_object($user))
             throw new HttpException(404, 'User not found');
-        $this->get("app.services.update_user_history_service")->refreshToken($user, true);
-
-        $ch = curl_init("https://api.spotify.com/v1/me/top/artists?limit=50");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer ' . $user->getToken()
-        ));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $server_output = curl_exec($ch);
-        curl_close($ch);
-        $topArtists = json_decode($server_output, true)["items"];
-
-        $ch = curl_init("https://api.spotify.com/v1/me/top/tracks?limit=50");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer ' . $user->getToken()
-        ));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $server_output = curl_exec($ch);
-        curl_close($ch);
-        $topSongs = json_decode($server_output, true)["items"];
+        $topArtists = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/artists?limit=50", $user)["items"];
+        $topSongs = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/tracks?limit=50", $user)["items"];
         return $this->render('AppBundle:Default:stats.html.twig', array(
             "topArtists" => $topArtists,
             "topSongs" => $topSongs,
@@ -142,19 +124,14 @@ class DefaultController extends Controller
     public function songAction($id) {
         $em = $this->getDoctrine()->getManager();
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        $this->get("app.services.update_user_history_service")->refreshToken($user, true);
+        //$this->get("app.services.update_user_history_service")->refreshToken($user, true);
         $song = $em->getRepository("AppBundle:Song")->find($id);
-        $ch = curl_init("https://api.spotify.com/v1/audio-analysis/".$song->getSongId());
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer ' . $user->getToken()
-        ));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $server_output = curl_exec($ch);
-        curl_close($ch);
-        $stats = json_decode($server_output, true);
+        $stats = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/audio-analysis/".$song->getSongId(), $user);
+        $popularities = $em->getRepository('AppBundle:SongPopularity')->findBy(array("song" => $song));
         return $this->render('AppBundle:Default:song.html.twig', array(
             "stats" => $stats,
             "song" => $song,
+            "popularities" => $popularities,
         ));
     }
 

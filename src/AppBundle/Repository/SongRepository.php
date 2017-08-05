@@ -3,6 +3,7 @@
 namespace AppBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * SongRepository
@@ -12,4 +13,19 @@ use Doctrine\ORM\EntityRepository;
  */
 class SongRepository extends EntityRepository
 {
+
+    public function getLastPouplarityValues() {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("song_id", "song_id");
+        $rsm->addScalarResult("popularity", "popularity");
+        $sql = <<< SQL
+            SELECT p.song_id, p.popularity
+            FROM song__popularity p
+            JOIN ( SELECT MAX(created_at) created_at, song_id FROM song__popularity GROUP BY song_id) p2 ON p.song_id = p2.song_id AND p.created_at = p2.created_at
+SQL;
+        return $this->getEntityManager()
+            ->createNativeQuery($sql, $rsm)
+            ->getScalarResult();
+    }
+
 }

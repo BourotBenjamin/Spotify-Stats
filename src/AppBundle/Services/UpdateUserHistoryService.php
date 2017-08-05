@@ -23,54 +23,29 @@ class UpdateUserHistoryService
 {
 
     private $em;
-    private $spotify;
-    private $usersAchievements;
+    private $spotifyApi;
 
     /**
      * UpdateUserHistoryService constructor.
      * @param $em
      */
-    public function __construct(EntityManager $em, SpotifyResourceOwner $spotify, UpdateUsersAchievementsService $usersAchievements)
+    public function __construct(EntityManager $em, SpotifyApiService $spotifyApi)
     {
         $this->em = $em;
-        $this->spotify = $spotify;
-        $this->usersAchievements = $usersAchievements;
-    }
-
-    function refreshToken(User $user, $flush = false) {
-        $result = $this->spotify->refreshAccessToken($user->getRefreshToken());
-        if(isset($result["access_token"]))
-            $user->setToken($result["access_token"]);
-        $this->em->persist($user);
-        if($flush) {
-            $this->em->flush();
-        }
+        $this->spotifyApi = $spotifyApi;
     }
 
     function updateUsersHistory()
     {
         $users = $this->em->getRepository('AppBundle:User')->findAll();
         foreach ($users as $user) {
-            $this->refreshToken($user);
             $this->updateUserHistory($user);
         }
         $this->em->flush();
     }
 
     function updateUserHistory(User $user, $flush = false) {
-        $lastFetch = $user->getLastFetch();
-        if($lastFetch)
-            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=50&after=".$lastFetch);
-        else
-            $ch = curl_init("https://api.spotify.com/v1/me/player/recently-played?limit=49");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer ' . $user->getToken()
-        ));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $server_output = curl_exec($ch);
-        curl_close($ch);
-        $api_response = json_decode($server_output, true);
-        $artists = $songs = $songsPlayed = [];
+        $api_response = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/me/player/recently-played?limit=49".(($lastFetch = $user->getLastFetch()) ? "&after=".$lastFetch : ""), $user);
         if(isset($api_response["items"])) {
             foreach ($api_response["items"] as $recently_played_item) {
                 $artist = null;

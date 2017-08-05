@@ -11,6 +11,7 @@ namespace AppBundle\Services;
 
 use AppBundle\Entity\Album;
 use AppBundle\Entity\Genre;
+use AppBundle\Entity\SongPopularity;
 use AppBundle\Entity\SongStats;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
@@ -19,10 +20,12 @@ class UpdateSongsService
 {
 
     private $em;
+    private $spotifyApi;
 
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManager $em, SpotifyApiService $spotifyApi)
     {
         $this->em = $em;
+        $this->spotifyApi = $spotifyApi;
     }
 
 
@@ -31,18 +34,12 @@ class UpdateSongsService
         $songs = $this->em->getRepository('AppBundle:Song')->findBy(array('stats' => null));
         $songsByIds = [];
         foreach ($songs as $songEntity) {
+            if(!empty($songEntity->getSongId()))
                 $songsByIds[$songEntity->getSongId()] = $songEntity;
         }
         $songsIds = array_chunk(array_keys($songsByIds), 50);
         foreach ($songsIds as $songsIdsSubArray) {
-            $ch = curl_init("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Authorization: Bearer ' . $user->getToken()
-            ));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $server_output = curl_exec($ch);
-            curl_close($ch);
-            $songFeatures = json_decode($server_output, true)["audio_features"];
+            $songFeatures = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray), $user)["audio_features"];
             foreach ($songFeatures as $key => $song)
                 if(!empty($song))
                 {
@@ -73,7 +70,8 @@ class UpdateSongsService
         $artists = $this->em->getRepository('AppBundle:Artist')->findAll();
         $artistsByIds = [];
         foreach ($artists as &$artist) {
-            $artistsByIds[$artist->getArtistId()] = &$artist;
+            if(!empty($artist->getArtistId()))
+                $artistsByIds[$artist->getArtistId()] = &$artist;
         }
         $genres = $this->em->getRepository('AppBundle:Genre')->findAll();
         $genresByNames = [];
@@ -83,14 +81,7 @@ class UpdateSongsService
 
         $artistsIds = array_chunk(array_keys($artistsByIds), 20);
         foreach ($artistsIds as $artistsIdsSubArray) {
-            $ch = curl_init("https://api.spotify.com/v1/artists?ids=" . implode(",", $artistsIdsSubArray));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Authorization: Bearer ' . $user->getToken()
-            ));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $server_output = curl_exec($ch);
-            curl_close($ch);
-            $artistsInfos = json_decode($server_output, true)["artists"];
+            $artistsInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists?ids=" . implode(",", $artistsIdsSubArray), $user)["artists"];
             foreach ($artistsInfos as $artistInfos) {
                 $artist = $artistsByIds[$artistInfos['id']];
                 foreach ($artistInfos['genres'] as $genreName) {
@@ -111,27 +102,24 @@ class UpdateSongsService
 
     public function updateSongAlbumAndPopularity(User &$user)
     {
+        $songsByIds = $albumsByIds = $popularitiesById = [];
         $songs = $this->em->getRepository('AppBundle:Song')->findAll();
-        $songsByIds = [];
         foreach ($songs as $songEntity) {
-            if(!is_object($songEntity->getStats()))
+            if(!empty($songEntity->getSongId()))
                 $songsByIds[$songEntity->getSongId()] = $songEntity;
         }
+        $popularities = $this->em->getRepository('AppBundle:Song')->getLastPouplarityValues();
+        foreach ($popularities as $popularity) {
+            $popularitiesById[$popularity['song_id']] = $popularity['popularity'];
+        }
         $albums = $this->em->getRepository('AppBundle:Album')->findAll();
-        $albumsByIds = [];
         foreach ($albums as &$album) {
-            $albumsByIds[$album->getAlbumId()] = &$album;
+            if(!empty($album->getAlbumId()))
+                $albumsByIds[$album->getAlbumId()] = &$album;
         }
         $songsIds = array_chunk(array_keys($songsByIds), 50);
         foreach ($songsIds as $songsIdsSubArray) {
-            $ch = curl_init("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsIdsSubArray));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Authorization: Bearer ' . $user->getToken()
-            ));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $server_output = curl_exec($ch);
-            curl_close($ch);
-            $songInfos = json_decode($server_output, true)["audio_features"];
+            $songInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsIdsSubArray), $user)["tracks"];
             foreach ($songInfos as $key => $song)
                 if(!empty($song))
                 {
@@ -144,9 +132,14 @@ class UpdateSongsService
                         $this->em->persist($albumsByIds[$song["album"]['id']]);
                     }
                     $songEntity->setAlbum($albumsByIds[$song["album"]['id']]);
-                    if(is_object($songStats = $songEntity->getStats()))
-                        $songStats->setPopularity($song['popularity']);
-                    $this->em->persist($songStats);
+                    if(($popularitiesById[$songEntity->getId()] ?? 0) != $song['popularity']) {
+                        if (is_object($songStats = $songEntity->getStats())) {
+                            $songStats->setPopularity($song['popularity']);
+                            $this->em->persist($songStats);
+                        }
+                        $popularity = new SongPopularity($song['popularity'], new \DateTime(), $songEntity);
+                        $this->em->persist($popularity);
+                    }
                     $this->em->persist($songEntity);
                 }
         }
