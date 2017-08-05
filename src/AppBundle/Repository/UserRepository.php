@@ -33,7 +33,7 @@ class UserRepository extends EntityRepository
         JOIN genre ON artist_genre.genre_id = genre.id
         WHERE played__song.user_id = ? 
         GROUP BY genre.id
-        ORDER BY count
+        ORDER BY count DESC
 SQL;
         return $this->getEntityManager()->createNativeQuery($sql, $rsm) ->setParameters(array($userId))->getScalarResult();
     }
@@ -49,9 +49,9 @@ SQL;
         JOIN artist ON song.artist_id = artist.id
         JOIN artist_genre ON artist.id = artist_genre.artist_id
         JOIN genre ON artist_genre.genre_id = genre.id
-        WHERE played__song.user_id = ? 
+        WHERE played__song.user_id = ?
         GROUP BY genre.id
-        ORDER BY count
+        ORDER BY count DESC
         LIMIT 5
 SQL;
         return $this->getEntityManager()->createNativeQuery($sql, $rsm) ->setParameters(array($userId))->getScalarResult();
