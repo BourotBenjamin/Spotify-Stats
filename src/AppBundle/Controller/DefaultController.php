@@ -99,8 +99,8 @@ class DefaultController extends Controller
             $user = $em->getRepository("AppBundle:User")->find($id);
         if(!is_object($user))
             throw new HttpException(404, 'User not found');
-        $topArtists = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/artists?limit=50", $user)["items"];
-        $topSongs = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/tracks?limit=50", $user)["items"];
+        $topArtists = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/artists?limit=50", $user, "items");
+        $topSongs = $this->get('app.services.spotify_api_service')->getSpotifyContent("https://api.spotify.com/v1/me/top/tracks?limit=50", $user, "items");
         return $this->render('AppBundle:Default:stats.html.twig', array(
             "topArtists" => $topArtists,
             "topSongs" => $topSongs,

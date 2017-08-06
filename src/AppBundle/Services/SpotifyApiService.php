@@ -38,7 +38,7 @@ class SpotifyApiService
         $this->em->flush();
     }
 
-    public function getSpotifyContent(string $url, User $user) {
+    public function getSpotifyContent(string $url, User $user, $key = null) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer ' . $user->getToken()
@@ -51,11 +51,21 @@ class SpotifyApiService
         }
         curl_close($ch);
         $data = json_decode($server_output, true);
-        if(isset($data["error"]["status"]) && ($data["error"]["status"] == 401)) {
-            $this->refreshToken($user);
-            return $this->getSpotifyContent($url, $user);
+        if(isset($data["error"]["status"])) {
+            if($data["error"]["status"] == 401) {
+                $this->refreshToken($user);
+                return $this->getSpotifyContent($url, $user);
+            } else {
+                echo($url."\n".$data["error"]["status"]." ".$data["error"]["message"]."\n");
+                return [];
+            }
         }
-        return $data;
+        if($key === null)
+            return $data;
+        elseif(isset($data[$key]))
+            return $data[$key];
+        else
+            return [];
     }
 
     public function getExternalContent(string $url) {

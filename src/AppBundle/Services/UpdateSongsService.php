@@ -10,10 +10,14 @@ namespace AppBundle\Services;
 
 
 use AppBundle\Entity\Album;
+use AppBundle\Entity\City;
+use AppBundle\Entity\Concert;
+use AppBundle\Entity\Country;
 use AppBundle\Entity\Genre;
 use AppBundle\Entity\SongPopularity;
 use AppBundle\Entity\SongStats;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Venue;
 use Doctrine\ORM\EntityManager;
 
 class UpdateSongsService
@@ -39,7 +43,7 @@ class UpdateSongsService
         }
         $songsIds = array_chunk(array_keys($songsByIds), 50);
         foreach ($songsIds as $songsIdsSubArray) {
-            $songFeatures = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray), $user)["audio_features"];
+            $songFeatures = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray), $user, "audio_features");
             foreach ($songFeatures as $key => $song)
                 if(!empty($song))
                 {
@@ -64,7 +68,6 @@ class UpdateSongsService
         }
     }
 
-
     public function updateArtistsGenres(User &$user)
     {
         $artists = $this->em->getRepository('AppBundle:Artist')->findAll();
@@ -81,7 +84,7 @@ class UpdateSongsService
 
         $artistsIds = array_chunk(array_keys($artistsByIds), 20);
         foreach ($artistsIds as $artistsIdsSubArray) {
-            $artistsInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists?ids=" . implode(",", $artistsIdsSubArray), $user)["artists"];
+            $artistsInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists?ids=" . implode(",", $artistsIdsSubArray), $user, "artists");
             foreach ($artistsInfos as $artistInfos) {
                 $artist = $artistsByIds[$artistInfos['id']];
                 foreach ($artistInfos['genres'] as $genreName) {
@@ -102,20 +105,79 @@ class UpdateSongsService
         }
     }
 
+    public function updateArtistsConcerts()
+    {
+        $concertsByIds = $artistsByName = $venuesByName = $countriesByName = $citiesByName = array();
+        $artists = $this->em->getRepository('AppBundle:Artist')->findAll();
+        foreach ($artists as &$artist)
+            $artistsByName[$artist->getName()] = $artist;
+        $countries = $this->em->getRepository('AppBundle:Country')->findAll();
+        foreach ($countries as &$country)
+            $countriesByName[$country->getName()] = $country;
+        $cities = $this->em->getRepository('AppBundle:City')->findAll();
+        foreach ($cities as &$city)
+            $citiesByName[$city->getName().";".$city->getCountry()->getName()] = $city;
+        $venues = $this->em->getRepository('AppBundle:Venue')->findAll();
+        foreach ($venues as &$venue)
+            $venuesByName[$venue->getName().";".$venue->getCity()->getName().";".$venue->getCity()->getCountry()->getName()] = $venue;
+        $concerts = $this->em->getRepository('AppBundle:Concert')->findAll();
+        foreach ($concerts as &$concert)
+            $concertsByIds[$concert->getId()] = 1;
+        foreach ($artists as &$artist) {
+            $concerts = $this->spotifyApi->getExternalContent( "https://rest.bandsintown.com/artists/"
+                .str_replace('+', '%20', urlencode($artist->getName()))
+                ."/events?app_id=philoupe%2F1.0%20%28%2Bhttp%3A%2F%2Fphiloupe.ddns.net%2F%29");
+            if(is_array($concerts))
+                foreach ($concerts as &$concert) {
+                    if (isset($concert['id'])) {
+                        if (!isset($concertsByIds[$concert['id']])) {
+                            $country = $concert['venue']['country'];
+                            $city = $country . ";" . $concert['venue']['city'];
+                            $venue = $city . ";" . $concert['venue']['name'];
+                            if (!isset($venuesByName[$venue])) {
+                                if (!isset($citiesByName[$city])) {
+                                    if (!isset($countriesByName[$country])) {
+                                        $countriesByName[$country] = new Country($country);
+                                        $this->em->persist($countriesByName[$country]);
+                                    }
+                                    $citiesByName[$city] = new City($city, $countriesByName[$country]);
+                                    $this->em->persist($citiesByName[$city]);
+                                }
+                                $venuesByName[$venue] = new Venue($venue, $citiesByName[$city]);
+                                $this->em->persist($venuesByName[$venue]);
+                            }
+                            $concertEntity = new Concert(
+                                $concert['id'],
+                                new \DateTime($concert['datetime']),
+                                $concert['url'],
+                                $venuesByName[$venue]
+                            );
+                            foreach ($concert["lineup"] as $artistName)
+                                if (isset($artistsByName[$artistName]))
+                                    $concertEntity->addArtist($artistsByName[$artistName]);
+                            $this->em->persist($concertEntity);
+                        }
+                    } elseif(isset($concert[0]) && is_string($concert[0]))
+                        echo($concert[0]." : ".$artist->getName()."\n");
+                }
+        }
+        $this->em->flush();
+    }
+
     public function updateArtistsAlbums(User &$user)
     {
         $artists = $this->em->getRepository('AppBundle:Artist')->findAll();
-        $albums = $this->em->getRepository('AppBundle:Album')->findAll();
+        $albums = $this->em->getRepository('AppBundle:Album')->getAllIds();
         $albumsByIds = [];
         foreach ($albums as &$album) {
-            if(!empty($album->getAlbumId()))
-                $albumsByIds[$album->getAlbumId()] = &$album;
+            if(!empty($album['id']))
+                $albumsByIds[$album['id']] = 1;
         }
         foreach ($artists as &$artist) {
             if(!empty($artist->getArtistId())){
                 $offset = 0;
                 do {
-                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50?", $user);
+                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50&offset=".$offset, $user);
                     foreach ($albums['items'] as $album) {
                         if(isset($albumsByIds[$album['id']])) {
                             $albumsByIds[$album['id']] = new Album(
@@ -152,7 +214,7 @@ class UpdateSongsService
         }
         $songsIds = array_chunk(array_keys($songsByIds), 50);
         foreach ($songsIds as $songsIdsSubArray) {
-            $songInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsIdsSubArray), $user)["tracks"];
+            $songInfos = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/tracks?ids=" . implode(",", $songsIdsSubArray), $user, "tracks");
             foreach ($songInfos as $key => $song)
                 if(!empty($song))
                 {
