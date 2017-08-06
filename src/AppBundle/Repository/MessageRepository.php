@@ -14,6 +14,13 @@ use Doctrine\ORM\Query\ResultSetMapping;
 class MessageRepository extends EntityRepository
 {
 
+    public function markMessagesAsReas($from, $to) {
+        $sql = <<< SQL
+            UPDATE message SET is_read = 1 WHERE user_form_id = $from AND user_to_id = $to
+SQL;
+        $this->getEntityManager()->getConnection()->query($sql)->execute();
+    }
+
     public function getLastMessagesByUsers($userId) {
         $rsm = new ResultSetMapping();
         $rsm->addScalarResult("message", "message");

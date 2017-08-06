@@ -37,6 +37,7 @@ class MessageController extends Controller
             $em->persist($message);
             $em->flush();
         }
+        $em->getRepository('AppBundle:Message')->markMessagesAsReas($user->getId(), $activUser->getId());
         $messages = $em->getRepository('AppBundle:Message')->findBy(array('from' => [$user, $activUser], 'to' => [$user, $activUser]), array('createdAt' => 'DESC'));
         return $this->render('AppBundle:Message:conversation.html.twig', array(
             'messages' => $messages,
