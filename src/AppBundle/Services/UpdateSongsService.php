@@ -137,13 +137,13 @@ class UpdateSongsService
                             if (!isset($venuesByName[$venue])) {
                                 if (!isset($citiesByName[$city])) {
                                     if (!isset($countriesByName[$country])) {
-                                        $countriesByName[$country] = new Country($country);
+                                        $countriesByName[$country] = new Country($concert['venue']['country']);
                                         $this->em->persist($countriesByName[$country]);
                                     }
-                                    $citiesByName[$city] = new City($city, $countriesByName[$country]);
+                                    $citiesByName[$city] = new City($concert['venue']['city'], $countriesByName[$country]);
                                     $this->em->persist($citiesByName[$city]);
                                 }
-                                $venuesByName[$venue] = new Venue($venue, $citiesByName[$city]);
+                                $venuesByName[$venue] = new Venue($concert['venue']['name'], $citiesByName[$city]);
                                 $this->em->persist($venuesByName[$venue]);
                             }
                             $concertEntity = new Concert(
