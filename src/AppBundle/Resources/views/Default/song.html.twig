@@ -1,108 +1,103 @@
-<style>
-        .bar {
-                position: relative;
-                margin-top: 2px;
-                height: 20px;
-                color: white;
-                line-height:initial;
-                padding-left: 5px;
-        }
-        .segments {
-                line-height:0;
-                display: inline-flex;
-                height: 400px;
-        }
-        .segment {
-                margin-left: 1px;
-                background-color: lightskyblue;
-                position: relative;
-        }
-</style>
-
-<h1>{{ song.name }} - <a href="{{ path('artist', {'id':  song.artist.id }) }}">{{  song.artist.name }}</a></h1>
-{% if song.stats != null and song.stats.danceability is defined %}
-<div class="stats">
-        <div class="bar" style="width: {{ song.stats.danceability * 6 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.popularity * 2.55) | round  }},{{ (song.stats.popularity * 2.55) | round }}, 0)">Popularity : {{ song.stats.popularity }}</div>
-        <div class="bar" style="width: {{ song.stats.danceability * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.danceability * 255) | round  }},{{ (song.stats.danceability * 255) | round }}, 0)">Danceability : {{ song.stats.danceability }}</div>
-        <div class="bar" style="width: {{ song.stats.energy * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.energy * 255) | round  }},{{ (song.stats.energy * 255) | round }}, 0)">Energy : {{ song.stats.energy }}</div>
-        <div class="bar" style="width: {{ song.stats.valence * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.valence * 255) | round  }},{{ (song.stats.valence * 255) | round }}, 0)">Valence : {{ song.stats.valence }}</div>
-        <div class="bar" style="width: {{ song.stats.speechiness * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.speechiness * 255) | round  }},{{ (song.stats.speechiness * 255) | round }}, 0)">Speechiness : {{ song.stats.speechiness }}</div>
-        <div class="bar" style="width: {{ song.stats.acousticness * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.acousticness * 255) | round  }},{{ (song.stats.acousticness * 255) | round }}, 0)">Acousticness : {{ song.stats.acousticness }}</div>
-        <div class="bar" style="width: {{ song.stats.liveness * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.liveness * 255) | round  }},{{ (song.stats.liveness * 255) | round }}, 0)">Liveness : {{ song.stats.liveness }}</div>
-        <div class="bar" style="width: {{ song.stats.instrumentalness * 600 + 150 }}px; background-color: rgb(
-        {{ 255 - (song.stats.instrumentalness * 255) | round  }},{{ (song.stats.instrumentalness * 255) | round }}, 0)">Instrumentalness : {{ song.stats.instrumentalness }}</div>
-        <div class="bar" style="width: {{ ((song.stats.loudness + 60) / 60) * 600 + 150 }}px;background-color: rgb(
-        {{ 255 - (((song.stats.loudness + 60) / 60) * 255) | round  }},{{ (((song.stats.loudness + 60) / 60) * 255) | round }}, 0)">loudness : {{ song.stats.loudness }}</div>
-        <div class="bar" style="width: {{ song.stats.songKey * 60 + 150 }}px;background-color: rgb(
-        {{ 255 - ((song.stats.songKey / 10.0) * 255) | round  }},{{ ((song.stats.songKey / 10.0) * 255) | round }}, 0)">songKey : {{ song.stats.songKey }}</div>
-        <div class="bar" style="width: {{ song.stats.tempo * 3 + 150 }}px;background-color: rgb(
-        {{ 255 - ((song.stats.tempo / 200.0) * 255) | round  }},{{ ((song.stats.tempo / 200.0) * 255) | round }}, 0)">tempo : {{ song.stats.tempo }}</div>
-        <div>Genres :  {{ song.artist.genres| join(', ') }} </div>
-</div>
-{% endif %}
-<div class="segments">
-    {% for segment in stats.segments %}
-        <div class="segment" style="
-                width: {{ segment.duration * 10 }}px;
-                height: {{ (segment.loudness_start + 60) * (segment.loudness_start + 60) / 20 }}px;
-                top: {{ 90 - ((segment.loudness_start + 60) * (segment.loudness_start + 60) / 40) }}px;
-                " ></div>
-    {% endfor %}
-</div>
-<div id="chartContainer" style="height: 300px; width: 100%;"></div>
-<a href="{{ path('homepage') }}">Return to index</a>
-
-
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-48763424-2', 'auto');
-    ga('send', 'pageview');
-
-</script>
-<script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-<script type="text/javascript">
-    window.onload = function () {
-        var chart = new CanvasJS.Chart("chartContainer",
-            {
-                title:{
-                    text: "Popularity"
-                },
-                axisX:{
-                    title: "timeline",
-                    gridThickness: 2
-                },
-                data: [
-                    {
-                        type: "area",
-                        dataPoints: [//array
-                            {% set minimum = 100 %}
-                            {% set maximum = 0 %}
-                            {% for popularity in popularities %}
-                            { x: new Date({{ popularity.createdAt | date('Y, m, d') }}), y: {{ popularity.popularity }}},
-                            {% if maximum < popularity.popularity %} {% set maximum = popularity.popularity %}{% endif %}
-                            {% if minimum > popularity.popularity %} {% set minimum = popularity.popularity %}{% endif %}
-                            {% endfor %}
-                        ],
+{% extends '::base.html.twig' %}
+{% block stylesheets %}
+    <style>
+            .bar {
+                    position: relative;
+                    margin-top: 2px;
+                    height: 20px;
+                    color: white;
+                    line-height:initial;
+                    padding-left: 5px;
+            }
+            .segments {
+                    line-height:0;
+                    display: inline-flex;
+                    height: 400px;
+            }
+            .segment {
+                    margin-left: 1px;
+                    background-color: lightskyblue;
+                    position: relative;
+            }
+    </style>
+{% endblock %}
+{% block body %}
+    <h1>{{ song.name }} - <a href="{{ path('artist', {'id':  song.artist.id }) }}">{{  song.artist.name }}</a></h1>
+    {% if song.stats != null and song.stats.danceability is defined %}
+    <div class="stats">
+            <div class="bar" style="width: {{ song.stats.danceability * 6 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.popularity * 2.55) | round  }},{{ (song.stats.popularity * 2.55) | round }}, 0)">Popularity : {{ song.stats.popularity }}</div>
+            <div class="bar" style="width: {{ song.stats.danceability * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.danceability * 255) | round  }},{{ (song.stats.danceability * 255) | round }}, 0)">Danceability : {{ song.stats.danceability }}</div>
+            <div class="bar" style="width: {{ song.stats.energy * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.energy * 255) | round  }},{{ (song.stats.energy * 255) | round }}, 0)">Energy : {{ song.stats.energy }}</div>
+            <div class="bar" style="width: {{ song.stats.valence * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.valence * 255) | round  }},{{ (song.stats.valence * 255) | round }}, 0)">Valence : {{ song.stats.valence }}</div>
+            <div class="bar" style="width: {{ song.stats.speechiness * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.speechiness * 255) | round  }},{{ (song.stats.speechiness * 255) | round }}, 0)">Speechiness : {{ song.stats.speechiness }}</div>
+            <div class="bar" style="width: {{ song.stats.acousticness * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.acousticness * 255) | round  }},{{ (song.stats.acousticness * 255) | round }}, 0)">Acousticness : {{ song.stats.acousticness }}</div>
+            <div class="bar" style="width: {{ song.stats.liveness * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.liveness * 255) | round  }},{{ (song.stats.liveness * 255) | round }}, 0)">Liveness : {{ song.stats.liveness }}</div>
+            <div class="bar" style="width: {{ song.stats.instrumentalness * 600 + 150 }}px; background-color: rgb(
+            {{ 255 - (song.stats.instrumentalness * 255) | round  }},{{ (song.stats.instrumentalness * 255) | round }}, 0)">Instrumentalness : {{ song.stats.instrumentalness }}</div>
+            <div class="bar" style="width: {{ ((song.stats.loudness + 60) / 60) * 600 + 150 }}px;background-color: rgb(
+            {{ 255 - (((song.stats.loudness + 60) / 60) * 255) | round  }},{{ (((song.stats.loudness + 60) / 60) * 255) | round }}, 0)">loudness : {{ song.stats.loudness }}</div>
+            <div class="bar" style="width: {{ song.stats.songKey * 60 + 150 }}px;background-color: rgb(
+            {{ 255 - ((song.stats.songKey / 10.0) * 255) | round  }},{{ ((song.stats.songKey / 10.0) * 255) | round }}, 0)">songKey : {{ song.stats.songKey }}</div>
+            <div class="bar" style="width: {{ song.stats.tempo * 3 + 150 }}px;background-color: rgb(
+            {{ 255 - ((song.stats.tempo / 200.0) * 255) | round  }},{{ ((song.stats.tempo / 200.0) * 255) | round }}, 0)">tempo : {{ song.stats.tempo }}</div>
+            <div>Genres :  {{ song.artist.genres| join(', ') }} </div>
+    </div>
+    {% endif %}
+    <div class="segments">
+        {% for segment in stats.segments %}
+            <div class="segment" style="
+                    width: {{ segment.duration * 10 }}px;
+                    height: {{ (segment.loudness_start + 60) * (segment.loudness_start + 60) / 20 }}px;
+                    top: {{ 90 - ((segment.loudness_start + 60) * (segment.loudness_start + 60) / 40) }}px;
+                    " ></div>
+        {% endfor %}
+    </div>
+    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+    <a href="{{ path('homepage') }}">Return to index</a>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var chart = new CanvasJS.Chart("chartContainer",
+                {
+                    title:{
+                        text: "Popularity"
+                    },
+                    axisX:{
+                        title: "timeline",
+                        gridThickness: 2
+                    },
+                    data: [
+                        {
+                            type: "area",
+                            dataPoints: [//array
+                                {% set minimum = 100 %}
+                                {% set maximum = 0 %}
+                                {% for popularity in popularities %}
+                                { x: new Date({{ popularity.createdAt | date('Y, m, d') }}), y: {{ popularity.popularity }}},
+                                {% if maximum < popularity.popularity %} {% set maximum = popularity.popularity %}{% endif %}
+                                {% if minimum > popularity.popularity %} {% set minimum = popularity.popularity %}{% endif %}
+                                {% endfor %}
+                            ],
+                        }
+                    ],
+                    axisY: {
+                        title: "%",
+                        minimum: {{ minimum - 1 }},
+                        maximum: {{ maximum + 1 }}
                     }
-                ],
-                axisY: {
-                    title: "%",
-                    minimum: {{ minimum - 1 }},
-                    maximum: {{ maximum + 1 }}
-                }
-            });
+                });
 
-        chart.render();
-    }
-</script>
+            chart.render();
+        }
+    </script>
+{% endblock %}

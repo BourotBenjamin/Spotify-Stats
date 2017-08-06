@@ -1,0 +1,12 @@
+{% extends '::base.html.twig' %}
+{% block body %}
+    <h1>Conversation avec {{ user.username }}</h1>
+    {% for message in messages %}
+        {{ message.from.username }} ( le {{ message.createdAt | date('d/m/Y h:i:s') }} )<br>
+        {{ message.message | raw }}<br>
+    {% endfor %}
+    <form action="" method="POST">
+        <textarea name="message"></textarea><br>
+        <button name="sendMessage" value="1" type="submit">Valiser</button>
+    </form>
+{% endblock %}

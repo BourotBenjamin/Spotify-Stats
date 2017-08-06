@@ -1,112 +1,106 @@
-<style>
-    .bar {
-        position: absolute;
-        top: 15px;
-        left: 55px;
-        height: 20px;
-        width: 200px;
-        background-color: darkred;
-        line-height:initial;
-        color: white;
-    }
-    .song, .song_unclassified {
-        display: block;
-        position: relative;
-        text-decoration: none;
-        color: black;
-    }
-    .song {
-        height: 50px;
-    }
-    .song-picture {
-        height: 50px;
-        width: 50px;
-        background-size: cover;
-    }
-</style>
-<h3>
-    Sort : <select title="sort-options" name="song-sort" class="song-sort">
-        <option value="popularity" selected="selected">popularity</option>
-        <option value="danceability">danceability</option>
-        <option value="energy">energy</option>
-        <option value="valence">valence</option>
-        <option value="speechiness">speechiness</option>
-        <option value="acousticness">acousticness</option>
-        <option value="liveness">liveness</option>
-        <option value="instrumentalness">instrumentalness</option>
-        <option value="loudness">loudness</option>
-        <option value="key">key</option>
-        <option value="tempo">tempo</option>
-    </select>
-</h3>
-<div class="top_songs">
-    <h2>Your last songs</h2>
-    {% for playedSong in playedSongs if playedSong.song.stats is not null and playedSong.song.stats.danceability is defined and playedSong.song.stats.popularity is not null  %}
-        <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}"
-           data-danceability="{{ playedSong.song.stats.danceability }}"
-           data-energy="{{ playedSong.song.stats.energy }}"
-           data-valence="{{ playedSong.song.stats.valence }}"
-           data-speechiness="{{ playedSong.song.stats.speechiness }}"
-           data-acousticness="{{ playedSong.song.stats.acousticness }}"
-           data-liveness="{{ playedSong.song.stats.liveness }}"
-           data-instrumentalness="{{ playedSong.song.stats.instrumentalness }}"
-           data-loudness="{{ playedSong.song.stats.loudness }}"
-           data-key="{{ playedSong.song.stats.songKey }}"
-           data-tempo="{{ playedSong.song.stats.tempo }}"
-           data-popularity="{{ playedSong.song.stats.popularity }}"
-        >
-            <div class="song-picture" style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div>
-            <div class="bar">{{ playedSong.song.name }}</div>
+{% extends '::base.html.twig' %}
+{% block stylesheets %}
+    <style>
+        .bar {
+            position: absolute;
+            top: 15px;
+            left: 55px;
+            height: 20px;
+            width: 200px;
+            background-color: darkred;
+            line-height:initial;
+            color: white;
+        }
+        .song, .song_unclassified {
+            display: block;
+            position: relative;
+            text-decoration: none;
+            color: black;
+        }
+        .song {
+            height: 50px;
+        }
+        .song-picture {
+            height: 50px;
+            width: 50px;
+            background-size: cover;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <h3>
+        Sort : <select title="sort-options" name="song-sort" class="song-sort">
+            <option value="popularity" selected="selected">popularity</option>
+            <option value="danceability">danceability</option>
+            <option value="energy">energy</option>
+            <option value="valence">valence</option>
+            <option value="speechiness">speechiness</option>
+            <option value="acousticness">acousticness</option>
+            <option value="liveness">liveness</option>
+            <option value="instrumentalness">instrumentalness</option>
+            <option value="loudness">loudness</option>
+            <option value="key">key</option>
+            <option value="tempo">tempo</option>
+        </select>
+    </h3>
+    <div class="top_songs">
+        <h2>Your last songs</h2>
+        {% for playedSong in playedSongs if playedSong.song.stats is not null and playedSong.song.stats.danceability is defined and playedSong.song.stats.popularity is not null  %}
+            <a class="song" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}"
+               data-danceability="{{ playedSong.song.stats.danceability }}"
+               data-energy="{{ playedSong.song.stats.energy }}"
+               data-valence="{{ playedSong.song.stats.valence }}"
+               data-speechiness="{{ playedSong.song.stats.speechiness }}"
+               data-acousticness="{{ playedSong.song.stats.acousticness }}"
+               data-liveness="{{ playedSong.song.stats.liveness }}"
+               data-instrumentalness="{{ playedSong.song.stats.instrumentalness }}"
+               data-loudness="{{ playedSong.song.stats.loudness }}"
+               data-key="{{ playedSong.song.stats.songKey }}"
+               data-tempo="{{ playedSong.song.stats.tempo }}"
+               data-popularity="{{ playedSong.song.stats.popularity }}"
+            >
+                <div class="song-picture" style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div>
+                <div class="bar">{{ playedSong.song.name }}</div>
+            </a>
+        {% endfor %}
+    </div>
+    <h2>Unclassified songs</h2>
+    {% for playedSong in playedSongs if playedSong.song.stats is null or playedSong.song.stats.danceability is not defined or playedSong.song.stats.popularity is null %}
+        <a class="song_unclassified" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
+            {% if  playedSong.song.album.pictureUrl is defined %} <div class="song-picture"style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div> {% endif %}
+            <div>{{ playedSong.song.name }}</div>
         </a>
     {% endfor %}
-</div>
-<h2>Unclassified songs</h2>
-{% for playedSong in playedSongs if playedSong.song.stats is null or playedSong.song.stats.danceability is not defined or playedSong.song.stats.popularity is null %}
-    <a class="song_unclassified" title="{{ playedSong.song.name }}" target="_blank" href="{{ path('song', {'id': playedSong.song.id }) }}">
-        {% if  playedSong.song.album.pictureUrl is defined %} <div class="song-picture"style="background-image: url('{{ playedSong.song.album.pictureUrl }}');"></div> {% endif %}
-        <div>{{ playedSong.song.name }}</div>
-    </a>
-{% endfor %}
 
 
-<a href="{{ path('homepage') }}">Return to index</a>
-<br>
-<br>
+    <a href="{{ path('homepage') }}">Return to index</a>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script>
-
-    function updateStats() {
-        var dataname = $(".song-sort").val();
-        $songs =  $(".top_songs");
-        $('.top_songs').html($songs.html());
-        var min = Math.min.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
-        var max = Math.max.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
-        $('.song').sort(function(a, b) {
-            return parseFloat($(b).data(dataname)) - parseFloat($(a).data(dataname));
-        }).appendTo($('.top_songs')).each( function ()  {
-            var pcent = ( parseFloat($(this).data(dataname)) - min ) / (max - min);
-            $(this).find(".bar").attr('title', $(this).data(dataname)).css('width', ( pcent * 600 + 200 )+"px")
-                .css("background-color", 'rgb('+
-                    parseInt( 255 - (pcent * 255) )+','+
-                    parseInt( pcent * 255 )+','+
-                    '0)'
-                );
+        function updateStats() {
+            var dataname = $(".song-sort").val();
+            $songs =  $(".top_songs");
+            $('.top_songs').html($songs.html());
+            var min = Math.min.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
+            var max = Math.max.apply(Math, $('.song').map(function() { return parseFloat($(this).data(dataname)); } ));
+            $('.song').sort(function(a, b) {
+                return parseFloat($(b).data(dataname)) - parseFloat($(a).data(dataname));
+            }).appendTo($('.top_songs')).each( function ()  {
+                var pcent = ( parseFloat($(this).data(dataname)) - min ) / (max - min);
+                $(this).find(".bar").attr('title', $(this).data(dataname)).css('width', ( pcent * 600 + 200 )+"px")
+                    .css("background-color", 'rgb('+
+                        parseInt( 255 - (pcent * 255) )+','+
+                        parseInt( pcent * 255 )+','+
+                        '0)'
+                    );
+            });
+        }
+        $(".song-sort").on("change", function() {
+            updateStats();
         });
-    }
-    $(".song-sort").on("change", function() {
         updateStats();
-    });
-    updateStats();
 
-</script>
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-48763424-2', 'auto');
-    ga('send', 'pageview');
-
-</script>
+    </script>
+{% endblock %}

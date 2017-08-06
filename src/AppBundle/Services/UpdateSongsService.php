@@ -102,6 +102,37 @@ class UpdateSongsService
         }
     }
 
+    public function updateArtistsAlbums(User &$user)
+    {
+        $artists = $this->em->getRepository('AppBundle:Artist')->findAll();
+        $albums = $this->em->getRepository('AppBundle:Album')->findAll();
+        $albumsByIds = [];
+        foreach ($albums as &$album) {
+            if(!empty($album->getAlbumId()))
+                $albumsByIds[$album->getAlbumId()] = &$album;
+        }
+        foreach ($artists as &$artist) {
+            if(!empty($artist->getArtistId())){
+                $offset = 0;
+                do {
+                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50?", $user);
+                    foreach ($albums['items'] as $album) {
+                        if(isset($albumsByIds[$album['id']])) {
+                            $albumsByIds[$album['id']] = new Album(
+                                $album['id'],
+                                $album['name'],
+                                $album['images'][0]['url'],
+                                $album['type']);
+                            $this->em->persist($albumsByIds[$album['id']]);
+                        }
+                    }
+                    $offset += 50;
+                } while($albums["total"] > $offset);
+            }
+        }
+        $this->em->flush();
+    }
+
     public function updateSongAlbumAndPopularity(User &$user)
     {
         $songsByIds = $albumsByIds = $popularitiesById = [];
@@ -131,11 +162,12 @@ class UpdateSongsService
                             $albumsByIds[$song["album"]['id']] = new Album(
                                 $song["album"]['id'],
                                 $song["album"]['name'],
-                                $song["album"]['images'][0]['url']);
+                                $song["album"]['images'][0]['url'],
+                                $song["album"]['type']);
                             $this->em->persist($albumsByIds[$song["album"]['id']]);
-                        }
+                        } else
+                            $albumsByIds[$song["album"]['id']]->setType($song["album"]['type']);
                         $songEntity->setAlbum($albumsByIds[$song["album"]['id']]);
-                        $albumsByIds[$song["album"]['id']]->setType($song["album"]['type']);
                         $this->em->persist($albumsByIds[$song["album"]['id']]);
                     }
                     if(($popularitiesById[$songEntity->getId()] ?? 0) != $song['popularity']) {

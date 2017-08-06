@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+{% block body %}
+    <h1>Vos conversations</h1>
+    <table>
+        {% for message in messages %}
+                <tr>
+                    <td><a href="{{ path('messages', {'id': message.user_id}) }}">{{ message.username }}</a></td>
+                    <td>{{ message.created_at }}</td>
+                    <td> {{ message.message | raw }}</td>
+                    <td>{% if message.is_read == 0 %}Non lu{% endif %}</td>
+                </tr>
+        {% endfor %}
+    </table>
+    <h3>New conversations with user Id : <form action="" method="POST"><input name="id" type="number" step="1"><button name="newConv" value="1" type="submit">Go !</button></form></h3>
+{% endblock %}

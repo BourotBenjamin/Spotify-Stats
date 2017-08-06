@@ -57,8 +57,9 @@ class DefaultController extends Controller
             throw new HttpException(404, 'User not found');
         return $this->render('AppBundle:Default:index.html.twig', array(
             "user" => $user,
-            "count" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
-            'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC'))
+            "nb_songs" =>$em->getRepository("AppBundle:User")->countPlayedSongs($user->getId()),
+            'achievements' => $em->getRepository('AppBundle:UserAchievement')->findBy(array('user' => $user), array('unlockedAt' => 'DESC')),
+            'nb_messages' => $em->getRepository('AppBundle:Message')-> getCountUnreadMessages($user->getId())
         ));
     }
 

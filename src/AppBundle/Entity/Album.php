@@ -55,11 +55,12 @@ class Album
      * @param $name
      * @param $pictureUrl
      */
-    public function __construct($albumId, $name, $pictureUrl)
+    public function __construct($albumId, $name, $pictureUrl, $type)
     {
         $this->albumId = $albumId;
         $this->name = $name;
         $this->pictureUrl = $pictureUrl;
+        $this->type = $type;
         $this->genres = new ArrayCollection();
     }
 

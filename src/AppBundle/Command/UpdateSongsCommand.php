@@ -28,6 +28,7 @@ class UpdateSongsCommand extends ContainerAwareCommand
         $this->getContainer()->get('app.services.update_songs_service')->updateSongStats($user);
         $this->getContainer()->get('app.services.update_songs_service')->updateSongAlbumAndPopularity($user);
         $this->getContainer()->get('app.services.update_songs_service')->updateArtistsGenres($user);
+        $this->getContainer()->get('app.services.update_songs_service')->updateArtistsAlbums($user);
         $em->flush();
     }
 }
