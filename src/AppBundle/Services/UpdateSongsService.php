@@ -66,6 +66,7 @@ class UpdateSongsService
                     }
                 }
         }
+        $this->em->flush();
     }
 
     public function updateArtistsGenres(User &$user)
@@ -103,6 +104,7 @@ class UpdateSongsService
                 $this->em->persist($artist);
             }
         }
+        $this->em->flush();
     }
 
     public function updateArtistsConcerts()
@@ -243,6 +245,7 @@ class UpdateSongsService
                     $this->em->persist($songEntity);
                 }
         }
+        $this->em->flush();
     }
 
 
