@@ -10,14 +10,20 @@
                     padding-left: 5px;
             }
             .segments {
-                    line-height:0;
-                    display: inline-flex;
-                    height: 400px;
+                line-height: 0;
+                font-size: 0;
+                height: 200px;
+                overflow-x: scroll;
+                width: 100%;
+                position: relative;
+                white-space: nowrap;
             }
             .segment {
-                    margin-left: 1px;
-                    background-color: lightskyblue;
-                    position: relative;
+                margin-left: 1px;
+                background-color: lightskyblue;
+                position: relative;
+                display: inline-block;
+                vertical-align: middle;
             }
     </style>
 {% endblock %}
@@ -55,7 +61,6 @@
             <div class="segment" style="
                     width: {{ segment.duration * 10 }}px;
                     height: {{ (segment.loudness_start + 60) * (segment.loudness_start + 60) / 20 }}px;
-                    top: {{ 90 - ((segment.loudness_start + 60) * (segment.loudness_start + 60) / 40) }}px;
                     " ></div>
         {% endfor %}
     </div>

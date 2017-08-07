@@ -5,9 +5,67 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         {% block stylesheets %}{% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <style type="text/css">
+            .navbar {
+                text-decoration: none;
+                color: white;
+                font-weight: bold;
+                background-color: black;
+                position: relative;
+                width: 100%;
+                height: 40px;
+            }
+            .menu {
+                float: right;
+                margin-right: 10%;
+                line-height: 40px;
+            }
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 20px;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+            body {
+                margin: 0;
+                background-color: #FAFAFA;
+            }
+            .content {
+                width: 90%;
+                position: absolute;
+                top: 40px;
+                left: 5%;
+                min-height: calc(100% - 60px);
+                background-color: #F2F2F2;
+                padding: 10px;
+            }
+            .footer {
+                position: absolute;
+                width: calc(100% - 20px);
+                text-align: center;
+                bottom: 0px;
+            }
+            .footer  h6 {
+                margin: 10px;
+            }
+        </style>
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <div class="navbar">
+            <div class="menu">
+                {% if app.user.id is defined %}
+                    <a href="{{ path('homepage') }}">Accueil</a>
+                    <a href="{{ path('profile', {'id':app.user.id}) }}">{{ app.user.username }}</a>
+                {% else %}
+                    <a href="{{ path('fos_user_security_login') }}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="content">
+            {% block body %}{% endblock %}
+            <div class="footer"><h6>Hosted in Montreuil. 9-3 RPZ. Thug Life !</h6></div>
+        </div>
         {% block javascripts %}
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
             <script>
