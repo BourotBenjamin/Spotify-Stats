@@ -46,7 +46,7 @@ class UpdateUserHistoryService
 
     function updateUserHistory(User $user, $flush = false) {
         $api_response = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/me/player/recently-played?limit=49".(($lastFetch = $user->getLastFetch()) ? "&after=".$lastFetch : ""), $user, "items");
-        foreach ($api_responsegithu as $recently_played_item) {
+        foreach ($api_response as $recently_played_item) {
             $artist = null;
             if(isset($artists[$recently_played_item["track"]["artists"][0]["id"]]))
                 $artist = $artists[$recently_played_item["track"]["artists"][0]["id"]];
