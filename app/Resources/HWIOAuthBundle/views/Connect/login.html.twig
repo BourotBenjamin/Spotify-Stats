@@ -1,0 +1,52 @@
+{% extends '::base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .connect-container {
+            width: 100%;
+            margin-top: 10%;
+        }
+        .spotify-connect {
+            background-color: white;
+            border-radius: 40px;
+            width: fit-content;
+            margin: auto;
+        }
+        .spotify-connect-link {
+            text-decoration: none;
+            color: #1DB954;
+            font-family: Arial, SansSerif, Helvetica Neue;
+            font-size: 25px;
+            padding-right: 40px;
+        }
+        .spotify-logo {
+            height: 40px;
+            width: 40px;
+            margin: 20px 20px 20px 40px;
+            vertical-align:middle
+        }
+        .spotify-text {
+            display: inline;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    {# Display oauth errors (here using Bootstrap) #}
+    {% if error is defined and error %}
+        <div class="row">
+            <div class="col-md-12 alert alert-danger text-center">
+                <span class="error">{{ error }}</span>
+            </div>
+        </div>
+    {% endif %}
+
+    <h1 style="text-align: center">Bonjour ! :)</h1>
+<div class="connect-container">
+    <div class="spotify-connect">
+        <a class="spotify-connect-link" href="{{ hwi_oauth_login_url('spotify') }}" style="margin: auto">
+            <img class="spotify-logo" src="{{ asset('images/spotify_green.png') }}">
+            <div class="spotify-text">Connect With Spotify</div>
+        </a>
+    </div>
+</div>
+{% endblock %}

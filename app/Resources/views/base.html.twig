@@ -58,7 +58,7 @@
                     <a href="{{ path('homepage') }}">Accueil</a>
                     <a href="{{ path('profile', {'id':app.user.id}) }}">{{ app.user.username }}</a>
                 {% else %}
-                    <a href="{{ path('fos_user_security_login') }}">Login</a>
+                    <a href="{{ path('hwi_oauth_connect') }}">Login</a>
                 {% endif %}
             </div>
         </div>
