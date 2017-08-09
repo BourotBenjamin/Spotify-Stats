@@ -25,6 +25,7 @@ security:
             oauth:
                 resource_owners:
                     spotify:           "/login/check-spotify"
+                    discogs:           "/login/check-discogs"
                 login_path:        /login
                 use_forward:       false
                 failure_path:      /login
@@ -35,5 +36,7 @@ security:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/connect/spotify, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login/check-spotify, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/connect/discogs, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login/check-discogs, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/[a-z], roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }

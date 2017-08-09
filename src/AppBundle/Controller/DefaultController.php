@@ -32,6 +32,17 @@ class DefaultController extends Controller
         return $this->indexAction($request);
     }
 
+
+    /**
+     * @Route("/test/{name}", name="test")
+     */
+    public function testsAction(Request $request, $name)
+    {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        ld($results = $this->get('app.services.spotify_api_service')->getDiscogsContent("https://api.discogs.com/database/search?type=artist&q=".$name, $user));
+        ldd($this->get('app.services.spotify_api_service')->getDiscogsContent($results["results"][0]["resource_url"], $user));
+    }
+
     /**
      * @Route("/users", name="user_list")
      */

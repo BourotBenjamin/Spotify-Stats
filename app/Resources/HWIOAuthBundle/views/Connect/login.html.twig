@@ -4,13 +4,13 @@
     <style>
         .connect-container {
             width: 100%;
-            margin-top: 10%;
         }
-        .spotify-connect {
+        .spotify-connect,  .discogs-connect {
             background-color: white;
             border-radius: 40px;
             width: fit-content;
             margin: auto;
+            margin-top: 100px;
         }
         .spotify-connect-link {
             text-decoration: none;
@@ -19,13 +19,20 @@
             font-size: 25px;
             padding-right: 40px;
         }
-        .spotify-logo {
+        .discogs-connect-link {
+            text-decoration: none;
+            color: #000000;
+            font-family: Arial, SansSerif, Helvetica Neue;
+            font-size: 25px;
+            padding-right: 40px;
+        }
+        .spotify-logo, .discogs-logo {
             height: 40px;
             width: 40px;
             margin: 20px 20px 20px 40px;
             vertical-align:middle
         }
-        .spotify-text {
+        .spotify-text, .discogs-text {
             display: inline;
         }
     </style>
@@ -46,6 +53,12 @@
         <a class="spotify-connect-link" href="{{ hwi_oauth_login_url('spotify') }}" style="margin: auto">
             <img class="spotify-logo" src="{{ asset('images/spotify_green.png') }}">
             <div class="spotify-text">Connect With Spotify</div>
+        </a>
+    </div>
+    <div class="discogs-connect">
+        <a class="discogs-connect-link" href="{{ hwi_oauth_login_url('discogs') }}" style="margin: auto">
+            <img class="discogs-logo" src="{{ asset('images/discogs_black.png') }}">
+            <div class="discogs-text">Connect With Discogs</div>
         </a>
     </div>
 </div>

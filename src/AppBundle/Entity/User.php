@@ -28,36 +28,33 @@ class User extends BaseUser
     private $spotifyId;
 
     /**
-     * @ORM\Column(name="token", type="string", length=255, unique=true)
+     * @ORM\Column(name="spotify_access_token", type="string", length=255, unique=true)
      */
-    private $token;
+    private $spotifyAccessToken;
 
     /**
-     * @ORM\Column(name="refresh_token", type="string")
+     * @ORM\Column(name="spotify_refresh_token", type="string")
      */
-    private $refreshToken;
+    private $spotifyRefreshToken;
+
+    /**
+     * @ORM\Column(name="discogs_id", type="string", unique=true)
+     */
+    private $discogsId;
+
+    /**
+     * @ORM\Column(name="discogs_access_token", type="string", length=255, unique=true)
+     */
+    private $discogsAccessToken;
+    /**
+     * @ORM\Column(name="discogs_secret_token", type="string", length=255, unique=true)
+     */
+    private $discogsSecretToken;
 
     /**
      * @ORM\Column(name="last_fetch", type="bigint", nullable=true)
      */
     private $last_fetch;
-
-    /**
-     * @return mixed
-     */
-    public function getRefreshToken()
-    {
-        return $this->refreshToken;
-    }
-
-    /**
-     * @param mixed $refreshToken
-     */
-    public function setRefreshToken($refreshToken)
-    {
-        $this->refreshToken = $refreshToken;
-        return $this;
-    }
 
     /**
      * Get id
@@ -67,6 +64,16 @@ class User extends BaseUser
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get spotifyId
+     *
+     * @return integer
+     */
+    public function getSpotifyId()
+    {
+        return $this->spotifyId;
     }
 
     /**
@@ -82,35 +89,91 @@ class User extends BaseUser
     }
 
     /**
-     * Get spotifyId
-     *
-     * @return integer 
+     * @return mixed
      */
-    public function getSpotifyId()
+    public function getSpotifyAccessToken()
     {
-        return $this->spotifyId;
+        return $this->spotifyAccessToken;
     }
 
     /**
-     * Set token
-     *
-     * @param string $token
+     * @param mixed $spotifyAccessToken
      * @return User
      */
-    public function setToken($token)
+    public function setSpotifyAccessToken($spotifyAccessToken)
     {
-        $this->token = $token;
+        $this->spotifyAccessToken = $spotifyAccessToken;
         return $this;
     }
 
     /**
-     * Get token
-     *
-     * @return string 
+     * @return mixed
      */
-    public function getToken()
+    public function getSpotifyRefreshToken()
     {
-        return $this->token;
+        return $this->spotifyRefreshToken;
+    }
+
+    /**
+     * @param mixed $spotifyRefreshToken
+     * @return User
+     */
+    public function setSpotifyRefreshToken($spotifyRefreshToken)
+    {
+        $this->spotifyRefreshToken = $spotifyRefreshToken;
+        return $this;
+    }
+
+    /**
+     * @param mixed $discogsId
+     */
+    public function setDiscogsId($discogsId)
+    {
+        $this->discogsId = $discogsId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscogsId()
+    {
+        return $this->discogsId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscogsAccessToken()
+    {
+        return $this->discogsAccessToken;
+    }
+
+    /**
+     * @param mixed $discogsAccessToken
+     * @return User
+     */
+    public function setDiscogsAccessToken($discogsAccessToken)
+    {
+        $this->discogsAccessToken = $discogsAccessToken;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscogSecretToken()
+    {
+        return $this->discogsSecretToken;
+    }
+
+    /**
+     * @param mixed $discogsSecretToken
+     * @return User
+     */
+    public function setDiscogsSecretToken($discogsSecretToken)
+    {
+        $this->discogsSecretToken = $discogsSecretToken;
+        return $this;
     }
 
     /**

@@ -17,3 +17,5 @@ hwi_oauth_login:
 
 spotify_login:
     path: /login/check-spotify
+discogs_login:
+    path: /login/check-discogs

@@ -16,6 +16,7 @@ use HWI\Bundle\OAuthBundle\Security\Core\Exception\AccountNotLinkedException;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -44,17 +45,20 @@ class FOSUBUserProvider implements UserProviderInterface, AccountConnectorInterf
      * @var PropertyAccessor
      */
     protected $accessor;
+
+    private $tokenStorage;
     /**
      * Constructor.
      *
      * @param UserManagerInterface $userManager fOSUB user provider
      * @param array                $properties  property mapping
      */
-    public function __construct(UserManagerInterface $userManager, array $properties)
+    public function __construct(UserManagerInterface $userManager, array $properties, TokenStorage $tokenStorage)
     {
         $this->userManager = $userManager;
         $this->properties = array_merge($this->properties, $properties);
         $this->accessor = PropertyAccess::createPropertyAccessor();
+        $this->tokenStorage = $tokenStorage;
     }
     /**
      * {@inheritdoc}
@@ -73,21 +77,45 @@ class FOSUBUserProvider implements UserProviderInterface, AccountConnectorInterf
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
         $username = $response->getUsername();
-        $user = $this->userManager->findUserBy(array($this->getProperty($response) => $username));
         if (null === $username ) {
             throw new AccountNotLinkedException(sprintf("User '%s' not found.", $username));
-        } elseif (null === $user) {
+        }
+        $resourceOwnerName = $response->getResourceOwner()->getName();
+        $propertyName = $this->getProperty($response);
+        $setterName = 'set'.ucfirst($propertyName);
+        $accessTokenSetterName = 'set'.ucfirst($resourceOwnerName).'AccessToken';
+        $refreshTokenSetterName = 'set'.ucfirst($resourceOwnerName).'RefreshToken';
+        $secretTokenSetterName = 'set'.ucfirst($resourceOwnerName).'SecretToken';
+        $setterName = 'set'.ucfirst($propertyName);
+        $email = empty($response->getEmail())?($username."@".$resourceOwnerName.".com"):$response->getEmail();
+        $user = null;
+        if(is_object($token =  $this->tokenStorage->getToken()))
+            $user = $token->getUser();
+        if(!is_object($user))
+            $user = $this->userManager->findUserBy(array($this->getProperty($response) => $username));
+        if(!is_object($user))
+            $user = $this->userManager->findUserBy(array("email" => $email));
+        if (null === $user) {
             $user = new User();
-            $user->setEmail(empty($response->getEmail())?($username."@spotify.com"):$response->getEmail())
+            $user
+                ->setEmail($email)
                 ->setUsername(empty($response->getRealName())?$username:$response->getRealName())
                 ->addRole("ROLE_USER")
                 ->setEnabled(true)
                 ->setLocked(false)
-                ->setToken($response->getOAuthToken()->getAccessToken())
-                ->setRefreshToken($response->getOAuthToken()->getRefreshToken())
-                ->setSpotifyId($response->getUsername())
                 ->setPlainPassword(bin2hex(openssl_random_pseudo_bytes(32)));
             ;
+        }
+        if(is_object($user)) {
+            $user->$setterName($username);
+            if($resourceOwnerName == "spotify")
+                $user
+                    ->$accessTokenSetterName($response->getOAuthToken()->getAccessToken())
+                    ->$refreshTokenSetterName($response->getOAuthToken()->getRefreshToken());
+            else
+                $user
+                    ->$accessTokenSetterName($response->getOAuthToken()->getAccessToken())
+                    ->$secretTokenSetterName($response->getOAuthToken()->getTokenSecret());
             $this->userManager->updateUser($user);
         }
         return $user;
