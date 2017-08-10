@@ -23,31 +23,31 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(name="spotify_id", type="string", unique=true)
+     * @ORM\Column(name="spotify_id", type="string", nullable=true)
      */
     private $spotifyId;
 
     /**
-     * @ORM\Column(name="spotify_access_token", type="string", length=255, unique=true)
+     * @ORM\Column(name="spotify_access_token", type="string", length=255, nullable=true)
      */
     private $spotifyAccessToken;
 
     /**
-     * @ORM\Column(name="spotify_refresh_token", type="string")
+     * @ORM\Column(name="spotify_refresh_token", type="string",  nullable=true)
      */
     private $spotifyRefreshToken;
 
     /**
-     * @ORM\Column(name="discogs_id", type="string", unique=true)
+     * @ORM\Column(name="discogs_id", type="string", nullable=true)
      */
     private $discogsId;
 
     /**
-     * @ORM\Column(name="discogs_access_token", type="string", length=255, unique=true)
+     * @ORM\Column(name="discogs_access_token", type="string", length=255, nullable=true)
      */
     private $discogsAccessToken;
     /**
-     * @ORM\Column(name="discogs_secret_token", type="string", length=255, unique=true)
+     * @ORM\Column(name="discogs_secret_token", type="string", length=255, nullable=true)
      */
     private $discogsSecretToken;
 
