@@ -33,4 +33,16 @@ SQL;
         return $this->findBy(["id" => array_column($ids, "artist_id")]);
     }
 
+    public function findAllArtistsIds() {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult("discogs_id", "discogs_id");
+        $sql = <<< SQL
+            SELECT a.discogs_id
+            FROM artist a
+SQL;
+        return $this->getEntityManager()
+            ->createNativeQuery($sql, $rsm)
+            ->getScalarResult();
+    }
+
 }

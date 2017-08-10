@@ -102,6 +102,10 @@ class SpotifyApiService
         }
         curl_close($ch);
         $data = json_decode($server_output, true);
+        if(isset($data["message"]) && $data["message"] == "You are making requests too quickly.") {
+            sleep(1);
+            return $this->getDiscogsContent($url, $user, $key);
+        }
         if($key === null)
             return $data;
         elseif(isset($data[$key]))

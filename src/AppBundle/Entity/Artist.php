@@ -23,7 +23,7 @@ class Artist
 
     /**
      * @var string
-     * @ORM\Column(name="artist_id", type="string", length=255)
+     * @ORM\Column(name="artist_id", type="string", length=255, nullable=true)
      */
     private $artistId;
 
@@ -40,15 +40,37 @@ class Artist
     private $pictureUrl;
 
     /**
+     * @var string
+     * @ORM\Column(name="discogs_id", type="integer", nullable=true)
+     */
+    private $discogsId;
+
+    /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Genre")
      */
     private $genres;
 
-    public function __construct($artistId, $name)
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Artist", inversedBy="members")
+     */
+    private $groups;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Artist", mappedBy="groups")
+     */
+    private $members;
+
+    public function __construct($artistId, $name, $discogsId = null)
     {
         $this->artistId = $artistId;
+        $this->discogsId = $discogsId;
         $this->name = $name;
+        $this->genres = new ArrayCollection();
+        $this->groups = new ArrayCollection();
+        $this->members = new ArrayCollection();
     }
 
     /**
@@ -138,4 +160,84 @@ class Artist
         $this->pictureUrl = $pictureUrl;
     }
 
+    /**
+     * @return ArrayCollection
+     */
+    public function getGroups()
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Artist $group) {
+        if(!$this->groups->contains($group))
+            $this->groups[] = $group;
+        return $this;
+    }
+
+
+    public function removeGroup(Artist $group) {
+        $this->groups->removeElement($group);
+        return $this;
+    }
+
+    /**
+     * @param ArrayCollection $groups
+     * @return Artist
+     */
+    public function setGroups(ArrayCollection $groups)
+    {
+        $this->groups = $groups;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getMembers()
+    {
+        return $this->members;
+    }
+
+    public function addMember(Artist $member) {
+        if(!$this->members->contains($member))
+            $this->members[] = $member;
+        return $this;
+    }
+
+
+    public function removeMember(Artist $member) {
+        $this->members->removeElement($member);
+        return $this;
+    }
+    
+    /**
+     * @param ArrayCollection $members
+     * @return Artist
+     */
+    public function setMembers(ArrayCollection $members)
+    {
+        $this->members = $members;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDiscogsId()
+    {
+        return $this->discogsId;
+    }
+
+    /**
+     * @param string $discogsId
+     * @return Artist
+     */
+    public function setDiscogsId(string $discogsId)
+    {
+        $this->discogsId = $discogsId;
+        return $this;
+    }
+    
+    
+    
 }

@@ -22,3 +22,6 @@ services:
     app.services.update_songs_service:
         class: AppBundle\Services\UpdateSongsService
         arguments: ['@doctrine.orm.default_entity_manager', '@app.services.spotify_api_service']
+    app.services.update_groups_service:
+        class: AppBundle\Services\UpdateGroupsService
+        arguments: ['@doctrine.orm.default_entity_manager', '@app.services.spotify_api_service']
