@@ -45,8 +45,7 @@ class UpdateSongsService
         foreach ($songsIds as $songsIdsSubArray) {
             $songFeatures = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/audio-features?ids=" . implode(",", $songsIdsSubArray), $user, "audio_features");
             foreach ($songFeatures as $key => $song)
-                if(!empty($song))
-                {
+                if(isset($song["id"])) {
                     $songEntity = $songsByIds[$song["id"]];
                     if(!is_object($songStats = $songEntity->getStats())) {
                         $songStats = new SongStats();
@@ -65,6 +64,8 @@ class UpdateSongsService
                         $this->em->persist($songEntity);
                     }
                 }
+                else
+                    var_dump($song);
         }
         $this->em->flush();
     }

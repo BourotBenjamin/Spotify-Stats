@@ -232,7 +232,7 @@ class Artist
      * @param string $discogsId
      * @return Artist
      */
-    public function setDiscogsId(string $discogsId)
+    public function setDiscogsId($discogsId)
     {
         $this->discogsId = $discogsId;
         return $this;
