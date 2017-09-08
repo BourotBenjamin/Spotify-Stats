@@ -227,7 +227,7 @@ class UpdateSongsService
                             $albumsByIds[$song["album"]['id']] = new Album(
                                 $song["album"]['id'],
                                 $song["album"]['name'],
-                                $song["album"]['images'][0]['url'],
+                                $song["album"]['images'][0]['url'] ?? "",
                                 $song["album"]['type']);
                             $this->em->persist($albumsByIds[$song["album"]['id']]);
                         } else
