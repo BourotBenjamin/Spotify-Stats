@@ -193,7 +193,8 @@ class UpdateSongsService
                             }
                         }
                         $offset += 50;
-                    }
+                    } else
+                        break;
                 } while($albums["total"] ?? ($offset + 1) > $offset);
             }
         }
