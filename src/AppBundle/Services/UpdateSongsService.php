@@ -180,8 +180,8 @@ class UpdateSongsService
             if(!empty($artist->getArtistId())){
                 $offset = 0;
                 do {
-                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50&offset=".$offset, $user);
-                    foreach ($albums['items'] as $album) {
+                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50&offset=".$offset, $user, 'items');
+                    foreach ($albums as $album) {
                         if(isset($albumsByIds[$album['id']])) {
                             $albumsByIds[$album['id']] = new Album(
                                 $album['id'],
