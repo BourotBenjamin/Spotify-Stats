@@ -180,19 +180,21 @@ class UpdateSongsService
             if(!empty($artist->getArtistId())){
                 $offset = 0;
                 do {
-                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50&offset=".$offset, $user, 'items');
-                    foreach ($albums as $album) {
-                        if(isset($albumsByIds[$album['id']])) {
-                            $albumsByIds[$album['id']] = new Album(
-                                $album['id'],
-                                $album['name'],
-                                $album['images'][0]['url'],
-                                $album['type']);
-                            $this->em->persist($albumsByIds[$album['id']]);
+                    $albums = $this->spotifyApi->getSpotifyContent("https://api.spotify.com/v1/artists/" . $artist->getArtistId() . "/albums?limit=50&offset=".$offset, $user);
+                    if(isset($albums['items'])) {
+                        foreach ($albums['items'] as $album) {
+                            if (isset($albumsByIds[$album['id']])) {
+                                $albumsByIds[$album['id']] = new Album(
+                                    $album['id'],
+                                    $album['name'],
+                                    $album['images'][0]['url'],
+                                    $album['type']);
+                                $this->em->persist($albumsByIds[$album['id']]);
+                            }
                         }
+                        $offset += 50;
                     }
-                    $offset += 50;
-                } while($albums["total"] > $offset);
+                } while($albums["total"] ?? ($offset + 1) > $offset);
             }
         }
         $this->em->flush();
